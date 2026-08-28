@@ -1,0 +1,46 @@
+# Central configuration for the Cats-vs-Dogs MLOps pipeline.
+# Every stage (preprocessing, training, evaluation) reads from this file,
+# so no hyperparameter is ever hardcoded in the source.
+
+data:
+  raw_dir: data/raw                 # original downloaded images (DVC-tracked)
+  processed_dir: data/processed     # 224x224 RGB splits (DVC-tracked)
+  classes: ["cat", "dog"]           # index 0 = cat, index 1 = dog
+  image_size: 224                   # 224 x 224 RGB, as required
+  channels: 3
+  max_images_per_class: 2000        # keep the dataset small enough to train on a laptop
+  split:
+    train: 0.8
+    val: 0.1
+    test: 0.1
+  seed: 42
+
+augmentation:
+  horizontal_flip: true
+  rotation_degrees: 15
+  color_jitter: 0.2
+  random_resized_crop_scale: [0.8, 1.0]
+
+train:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
+  optimizer: adam
+  weight_decay: 0.0001
+  num_workers: 0                    # 0 is the safe choice on Windows
+  seed: 42
+  early_stopping_patience: 3
+
+model:
+  name: baseline_cnn
+  conv_blocks: 4                    # 32 -> 64 -> 128 -> 256 filters
+  base_filters: 32
+  dropout: 0.5
+  num_classes: 2
+  artifact_dir: artifacts
+  artifact_name: model.pt
+
+mlflow:
+  tracking_uri: file:./mlruns
+  experiment_name: cats-vs-dogs
+  run_name: baseline-cnn

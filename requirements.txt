@@ -1,0 +1,16 @@
+# ---- Core numerics / imaging ----
+numpy==2.5.2
+pillow==12.3.0
+
+# ---- Deep learning (PyTorch: TensorFlow has no Python 3.14 support) ----
+torch==2.13.0
+torchvision==0.28.0
+
+# ---- Config & metrics ----
+PyYAML==6.0.3
+scikit-learn==1.9.0
+matplotlib==3.11.1
+
+# ---- Experiment tracking & data versioning ----
+mlflow==3.15.2
+dvc==3.67.1

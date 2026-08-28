@@ -1,0 +1,34 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- Data (versioned by DVC, not Git) ----
+/data/raw/*
+!/data/raw/.gitkeep
+/data/processed/*
+!/data/processed/.gitkeep
+
+# ---- Model artifacts (versioned by DVC / MLflow) ----
+/artifacts/*
+!/artifacts/.gitkeep
+
+# ---- MLflow local tracking store ----
+mlruns/
+mlartifacts/
+
+# ---- Test / tooling caches ----
+.pytest_cache/
+.coverage
+htmlcov/
+.dvc/tmp
+.dvc/cache
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
