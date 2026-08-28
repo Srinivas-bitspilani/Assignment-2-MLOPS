@@ -16,6 +16,7 @@ env/
 # ---- MLflow local tracking store ----
 mlruns/
 mlartifacts/
+mlflow.db
 
 # ---- Test / tooling caches ----
 .pytest_cache/

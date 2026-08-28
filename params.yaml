@@ -46,6 +46,10 @@ model:
   artifact_name: model.pt
 
 mlflow:
-  tracking_uri: file:./mlruns
+  # MLflow 3.x put the plain-file store into maintenance mode and refuses it,
+  # so we use the recommended SQLite backend. The path is relative to the repo
+  # root and is resolved to an absolute path at runtime.
+  tracking_uri: sqlite:///mlflow.db
+  artifact_location: mlartifacts
   experiment_name: cats-vs-dogs
   run_name: baseline-cnn
