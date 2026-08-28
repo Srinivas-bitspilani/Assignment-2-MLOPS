@@ -242,7 +242,7 @@ anything.
 
 | Evidence | Detail |
 |---|---|
-| `test-evidence-py3.11`, `test-evidence-py3.12` | JUnit XML, `coverage.xml`, HTML coverage, model-artifact inspection |
+| `test-evidence-py3.12`, `test-evidence-py3.13` | JUnit XML, `coverage.xml`, HTML coverage, model-artifact inspection |
 | `build-evidence` | `/health`, `/predict`, `/metrics` responses from the built image, plus container logs |
 | Rendered summaries | Environment versions, per-module test counts, coverage per package, image size/layers/user/entrypoint, smoke-test predictions, published digest and tags |
 

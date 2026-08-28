@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/ci.yml)
 [![CD](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/cd.yml)
-[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/python-3.12%20%7C%203.13-blue)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.13-EE4C2C)](https://pytorch.org/)
 [![Image](https://img.shields.io/badge/GHCR-published-2496ED)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/pkgs/container/assignment-2-mlops)
 
@@ -482,12 +482,12 @@ all 276 MB of data, `mlruns/`, `.git/` and the training-only source out.
 
 `.github/workflows/ci.yml`, on every push/PR to `main`:
 
-**Job 1 — `test`** (matrix: Python **3.11** and **3.12**)
+**Job 1 — `test`** (matrix: Python **3.12** and **3.13**)
 1. Install pinned deps (`requirements-api.txt` + `requirements-dev.txt`) from the CPU wheel index
 2. Inspect `artifacts/model.pt`: architecture, class order, run id, metrics, and the registry champion
 3. Run pytest with JUnit XML + coverage
 4. Render test and coverage tables onto the run page
-5. Upload `test-evidence-py3.11` / `test-evidence-py3.12` artifacts (JUnit XML, `coverage.xml`, HTML coverage, inspection log) — 90-day retention
+5. Upload `test-evidence-py3.12` / `test-evidence-py3.13` artifacts (JUnit XML, `coverage.xml`, HTML coverage, inspection log) — 90-day retention
 
 **Job 2 — `build-and-push`** (`needs: test`, so a red build can never publish)
 1. Build the image with Buildx + GitHub Actions layer cache
@@ -747,7 +747,7 @@ Rows in *italics* go beyond the stated requirements.
 | | Automated testing | `ci.yml` → job `test` |
 | | Docker image build | `ci.yml` → job `build-and-push` |
 | | Publish to registry | GHCR, `latest` + `sha-<commit>` |
-| | *Test matrix* | Python 3.11 + 3.12 |
+| | *Test matrix* | Python 3.12 + 3.13 |
 | | *Uploaded evidence* | JUnit XML, coverage, image smoke-test responses |
 | | *Run summaries* | rendered tables on every run page |
 | **M4** | K8s Deployment | `k8s/deployment.yaml` |
