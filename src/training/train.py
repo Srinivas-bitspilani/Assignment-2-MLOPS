@@ -43,7 +43,11 @@ from torch import nn  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src.config import PROJECT_ROOT, load_params, resolve  # noqa: E402
 from src.data.dataset import build_dataloaders  # noqa: E402
-from src.models.cnn import build_model, count_parameters  # noqa: E402
+from src.models.factory import (  # noqa: E402
+    build_from_config,
+    count_total,
+    count_trainable,
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -59,6 +63,126 @@ def flatten_params(params: dict, prefix: str = "") -> dict:
         else:
             flat[name] = value
     return flat
+
+
+def parse_args(argv=None):
+    """CLI overrides for params.yaml.
+
+    params.yaml stays the canonical config; these flags let a second candidate
+    be trained without editing it, and every override is logged to MLflow so
+    the run is still fully described by its own parameters.
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Train a cats-vs-dogs classifier")
+    parser.add_argument("--architecture", choices=["baseline_cnn", "resnet18_finetune"],
+                        help="Override model.architecture")
+    parser.add_argument("--epochs", type=int, help="Override train.epochs")
+    parser.add_argument("--learning-rate", type=float, help="Override train.learning_rate")
+    parser.add_argument("--run-name", help="Override mlflow.run_name")
+    parser.add_argument("--artifact-name", help="Override model.artifact_name")
+    parser.add_argument("--no-register", action="store_true",
+                        help="Skip MLflow Model Registry registration")
+    return parser.parse_args(argv)
+
+
+def apply_overrides(params: dict, args) -> dict:
+    """Fold CLI overrides into the params dict and report what changed."""
+    changed = {}
+    if args.architecture:
+        params["model"]["architecture"] = args.architecture
+        params["model"]["name"] = args.architecture
+        changed["model.architecture"] = args.architecture
+    if args.epochs:
+        params["train"]["epochs"] = args.epochs
+        changed["train.epochs"] = args.epochs
+    if args.learning_rate:
+        params["train"]["learning_rate"] = args.learning_rate
+        changed["train.learning_rate"] = args.learning_rate
+    if args.run_name:
+        params["mlflow"]["run_name"] = args.run_name
+        changed["mlflow.run_name"] = args.run_name
+    if args.artifact_name:
+        params["model"]["artifact_name"] = args.artifact_name
+        changed["model.artifact_name"] = args.artifact_name
+
+    if changed:
+        print("CLI overrides applied:", json.dumps(changed), flush=True)
+    return params
+
+
+def register_model_version(
+    model, run_id: str, mlflow_cfg: dict, model_cfg: dict, final: dict, classes: list
+):
+    """Log the model as an MLflow flavour and register a new registry version.
+
+    The new version is tagged with everything needed to compare candidates
+    later and given the 'challenger' alias. Promotion to 'champion' is a
+    separate, gated decision made by scripts/promote_model.py -- a training run
+    never promotes itself.
+    """
+    from mlflow.tracking import MlflowClient
+
+    name = mlflow_cfg["registered_model_name"]
+
+    # MLflow 3.x defaults to the traced 'pt2' format, which requires an
+    # input_example so it can trace model.forward. Supplying one is the better
+    # fix anyway: it also gives the registered version a model signature.
+    example = torch.randn(1, 3, 224, 224).numpy()
+    try:
+        info = mlflow.pytorch.log_model(
+            pytorch_model=model,
+            name="model",
+            registered_model_name=name,
+            input_example=example,
+        )
+    except Exception as exc:
+        # Some architectures are not cleanly traceable; fall back to the
+        # pickle-based flavour rather than losing the registration.
+        print(f"  pt2 logging failed ({exc}); retrying as pickle", flush=True)
+        info = mlflow.pytorch.log_model(
+            pytorch_model=model,
+            name="model",
+            registered_model_name=name,
+            serialization_format="pickle",
+        )
+    print(f"logged model flavour -> {info.model_uri}", flush=True)
+
+    client = MlflowClient()
+    versions = client.search_model_versions(f"name='{name}'")
+    version = max(versions, key=lambda v: int(v.version))
+
+    for key, value in {
+        "architecture": model_cfg.get("architecture", "baseline_cnn"),
+        "test_accuracy": f"{final['test_accuracy']:.4f}",
+        "test_f1": f"{final['test_f1']:.4f}",
+        "test_loss": f"{final['test_loss']:.4f}",
+        "best_epoch": str(int(final["best_epoch"])),
+        "classes": ",".join(classes),
+        "source_run_id": run_id,
+    }.items():
+        client.set_model_version_tag(name, version.version, key, value)
+
+    client.update_model_version(
+        name=name,
+        version=version.version,
+        description=(
+            f"{model_cfg.get('architecture')} | test_accuracy="
+            f"{final['test_accuracy']:.4f} | run={run_id}"
+        ),
+    )
+
+    # Every new candidate becomes the challenger; promotion is gated elsewhere.
+    client.set_registered_model_alias(
+        name, mlflow_cfg["challenger_alias"], version.version
+    )
+
+    print(
+        f"registered {name} version {version.version} "
+        f"(alias '{mlflow_cfg['challenger_alias']}')",
+        flush=True,
+    )
+    return name, version.version
 
 
 def resolve_tracking_uri(mlflow_cfg: dict) -> str:
@@ -189,8 +313,9 @@ def plot_confusion_matrix(cm: np.ndarray, classes: list, out_path: Path) -> None
 # --------------------------------------------------------------------------- #
 # main
 # --------------------------------------------------------------------------- #
-def main() -> None:
-    params = load_params()
+def main(argv=None) -> None:
+    args = parse_args(argv)
+    params = apply_overrides(load_params(), args)
     train_cfg = params["train"]
     model_cfg = params["model"]
     mlflow_cfg = params["mlflow"]
@@ -205,17 +330,23 @@ def main() -> None:
     artifact_dir.mkdir(parents=True, exist_ok=True)
 
     loaders, classes = build_dataloaders(params)
-    model = build_model(params).to(device)
+    model = build_from_config(model_cfg, params["data"]).to(device)
     criterion = nn.CrossEntropyLoss()
+    # Only optimise parameters that actually require grad: for a frozen
+    # backbone that is just the new head.
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        [p for p in model.parameters() if p.requires_grad],
         lr=float(train_cfg["learning_rate"]),
         weight_decay=float(train_cfg["weight_decay"]),
     )
 
     print(
-        f"device={device}  threads={torch.get_num_threads()}  "
-        f"trainable_params={count_parameters(model):,}"
+        f"architecture={model_cfg.get('architecture')}  device={device}  "
+        f"threads={torch.get_num_threads()}"
+    )
+    print(
+        f"parameters: {count_trainable(model):,} trainable "
+        f"/ {count_total(model):,} total"
     )
     print(
         f"train={len(loaders['train'].dataset)}  "
@@ -246,7 +377,8 @@ def main() -> None:
             {
                 "device": str(device),
                 "torch_version": torch.__version__,
-                "trainable_parameters": count_parameters(model),
+                "trainable_parameters": count_trainable(model),
+                "total_parameters": count_total(model),
                 "n_train": len(loaders["train"].dataset),
                 "n_val": len(loaders["val"].dataset),
                 "n_test": len(loaders["test"].dataset),
@@ -349,10 +481,16 @@ def main() -> None:
         )
 
         # ---- artifacts ---------------------------------------------------------
-        curves_path = artifact_dir / "training_curves.png"
-        cm_path = artifact_dir / "confusion_matrix.png"
-        report_path = artifact_dir / "classification_report.txt"
-        metrics_path = artifact_dir / "metrics.json"
+        # Artefact names are namespaced per candidate so training a second
+        # model never overwrites the first one's evidence. The baseline keeps
+        # the original unprefixed filenames.
+        stem = Path(model_cfg["artifact_name"]).stem
+        prefix = "" if stem == "model" else f"{stem}_"
+
+        curves_path = artifact_dir / f"{prefix}training_curves.png"
+        cm_path = artifact_dir / f"{prefix}confusion_matrix.png"
+        report_path = artifact_dir / f"{prefix}classification_report.txt"
+        metrics_path = artifact_dir / f"{prefix}metrics.json"
         model_path = artifact_dir / model_cfg["artifact_name"]
 
         plot_curves(history, curves_path)
@@ -394,6 +532,9 @@ def main() -> None:
             {
                 "state_dict": model.state_dict(),
                 "classes": classes,
+                # architecture is what lets api/model_loader.py rebuild the
+                # right network for whichever version was promoted.
+                "architecture": model_cfg.get("architecture", "baseline_cnn"),
                 "model_config": model_cfg,
                 "data_config": {
                     "image_size": params["data"]["image_size"],
@@ -418,8 +559,26 @@ def main() -> None:
             mlflow.log_artifact(str(split_summary))
         mlflow.log_artifact(str(PROJECT_ROOT / "params.yaml"))
 
+        # ---- MLflow Model Registry -------------------------------------------
+        if not args.no_register:
+            try:
+                registered_name, version = register_model_version(
+                    model, run.info.run_id, mlflow_cfg, model_cfg, final, classes
+                )
+                mlflow.set_tags(
+                    {
+                        "registered_model": registered_name,
+                        "registered_version": version,
+                    }
+                )
+            except Exception as exc:  # never lose a training run over this
+                print(f"WARNING: model registration failed: {exc}", flush=True)
+
         print(f"\nMLflow run complete: {run.info.run_id}")
-        print("View with:  python -m mlflow ui --backend-store-uri ./mlruns")
+        print(
+            "View with:  python -m mlflow ui --backend-store-uri sqlite:///mlflow.db"
+        )
+        print("Promote with:  python scripts/promote_model.py")
 
 
 if __name__ == "__main__":

@@ -11,8 +11,11 @@ from __future__ import annotations
 import pytest
 import torch
 
+from torch import nn
+
 from api.model_loader import ModelService, ModelNotLoadedError
-from src.models.cnn import BaselineCNN, build_model, count_parameters
+from src.models.cnn import build_model, count_parameters
+from src.models.factory import SUPPORTED
 from tests.conftest import make_image_bytes
 
 
@@ -74,10 +77,18 @@ def test_model_is_input_size_agnostic(params):
 # 2. ModelService
 # --------------------------------------------------------------------------- #
 def test_service_loads_checkpoint(checkpoint_path, classes):
+    """The service must load whichever architecture was promoted to champion.
+
+    Deliberately architecture-agnostic: asserting BaselineCNN here would fail
+    the moment a better model (e.g. resnet18_finetune) is promoted, which is a
+    normal event, not a regression.
+    """
     service = ModelService(checkpoint_path).load()
     assert service.is_loaded
     assert service.classes == classes
-    assert isinstance(service.model, BaselineCNN)
+    assert isinstance(service.model, nn.Module)
+    assert service.architecture in SUPPORTED
+    assert not service.model.training  # eval mode
 
 
 def test_service_class_order_is_cat_then_dog(checkpoint_path):

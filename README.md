@@ -1,5 +1,16 @@
 # MLOps Pipeline — Cats vs Dogs Binary Image Classification
 
+[![CI](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/ci.yml)
+[![CD](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/workflows/cd.yml)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.13-EE4C2C)](https://pytorch.org/)
+[![Image](https://img.shields.io/badge/GHCR-published-2496ED)](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/pkgs/container/assignment-2-mlops)
+
+The badges above are live: they read the current state of the two workflows on
+`main`, so they go red the moment a push breaks the pipeline. Captured run
+output — registry promotions, test and coverage reports, deployment logs — is
+committed in **[docs/EVIDENCE.md](docs/EVIDENCE.md)**.
+
 An end-to-end MLOps pipeline for a pet adoption platform: a CNN that classifies
 an uploaded photo as **cat** or **dog**, wrapped in everything needed to train
 it reproducibly, serve it, test it, ship it, deploy it and watch it in production.
@@ -49,73 +60,79 @@ deployment is traceable to an exact commit.
 ## 1. Results
 
 <!-- RESULTS_START -->
-**Run `d604ad0f8b8a4a72b29b45d8789bfd89`** — baseline CNN, 389,410 parameters,
-trained from scratch on CPU, 10 epochs, best weights restored from **epoch 8**.
+Two candidates are registered in the MLflow Model Registry. The `champion`
+alias decides which one is served, and promotion is gated on test accuracy.
 
-| Metric (held-out test split, 400 images) | Value |
+| | v1 `baseline_cnn` | v2 `resnet18_finetune` **(champion)** |
+|---|---|---|
+| Approach | 4-block CNN from scratch | ImageNet ResNet18, frozen backbone, new head |
+| Total parameters | 389,410 | 11,177,538 |
+| **Trainable** parameters | 389,410 | **1,026** |
+| Epochs | 10 | 4 |
+| **Test accuracy** | 72.50 % | **97.50 %** |
+| Test F1 (macro) | 0.7250 | **0.9750** |
+| Test loss | 0.5633 | **0.0654** |
+| Confusion matrix | `[[143,57],[53,147]]` | `[[195,5],[5,195]]` |
+| MLflow run | `d604ad0f` | `3594a3ace` |
+
+Fine-tuning trains **1,026 parameters** — 0.009 % of the network — and gains 25
+percentage points. Keeping the from-scratch baseline registered as v1 is what
+makes that gain measurable rather than asserted.
+
+**Champion (v2) on the held-out test split, 400 images**
+
+| Metric | Value |
 |---|---|
-| Accuracy | **72.50 %** |
-| Precision (macro) | 72.51 % |
-| Recall (macro) | 72.50 % |
-| F1 (macro) | 72.50 % |
-| Test loss | 0.5633 |
-| Best epoch | 8 (`val_loss` 0.5159, `val_accuracy` 0.7425) |
-| Peak validation accuracy | 77.25 % (epoch 7) |
-
-**Confusion matrix (test set)**
+| Accuracy | **97.50 %** |
+| Precision / Recall / F1 (macro) | 97.50 % / 97.50 % / 97.50 % |
+| Test loss | 0.0654 |
+| Best epoch | 4 (`val_loss` 0.0305, `val_accuracy` 0.9900) |
 
 | | predicted cat | predicted dog | recall |
 |---|---|---|---|
-| **true cat** | 143 | 57 | 71.5 % |
-| **true dog** | 53 | 147 | 73.5 % |
+| **true cat** | 195 | 5 | 97.5 % |
+| **true dog** | 5 | 195 | 97.5 % |
 
-Errors are almost perfectly balanced (57 vs 53), so the model is not biased
-toward either class — what you would want from a 50/50 stratified split.
+Errors are symmetric (5 and 5), so neither class is favoured.
 
-**Per-epoch validation accuracy**
+**Baseline (v1) for comparison.** 72.50 % accuracy, confusion matrix
+`[[143, 57], [53, 147]]`, errors balanced 57 vs 53. Validation loss bottomed at
+epoch 8 then climbed to 0.6591 by epoch 10 as it began to overfit — visible in
+`artifacts/training_curves.png`, and the reason the trainer restores the *best*
+weights rather than the last.
 
-| epoch | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| val acc | .530 | .670 | .708 | .665 | .678 | .765 | **.773** | .743 | .728 | .618 |
+**Train/serve consistency.** `scripts/evaluate_deployed_model.py` sends all 400
+test images to the *running service* over HTTP and reproduces the training-time
+confusion matrix **exactly**, for both models, in every environment they were
+deployed to:
 
-Validation loss bottoms out at epoch 8 and then climbs sharply (0.5159 → 0.6591)
-as the model starts to overfit — visible in `artifacts/training_curves.png`.
-This is exactly why the script restores the **best** weights rather than the
-last ones; using epoch 10 would have cost about 10 points of accuracy.
+| Model | Environment | Confusion matrix | Accuracy |
+|---|---|---|---|
+| v1 | Training (in-process) | `[[143,57],[53,147]]` | 72.50 % |
+| v1 | Local uvicorn | `[[143,57],[53,147]]` | 72.50 % |
+| v1 | Docker container | `[[143,57],[53,147]]` | 72.50 % |
+| v1 | Kubernetes, 2 replicas | `[[143,57],[53,147]]` | 72.50 % |
+| **v2** | Training (in-process) | `[[195,5],[5,195]]` | **97.50 %** |
+| **v2** | Local uvicorn | `[[195,5],[5,195]]` | **97.50 %** |
 
-**Train/serve consistency check.** `scripts/evaluate_deployed_model.py -n 200`
-sends all 400 test images to the *running service* over HTTP. It reproduces the
-training-time confusion matrix **exactly** in every environment the model was
-deployed to — which is positive proof that there is no preprocessing drift
-between training and serving:
-
-| Environment | cat→cat | cat→dog | dog→cat | dog→dog | accuracy |
-|---|---|---|---|---|---|
-| Training (in-process) | 143 | 57 | 53 | 147 | 72.50 % |
-| Local uvicorn (HTTP) | 143 | 57 | 53 | 147 | 72.50 % |
-| Docker container | 143 | 57 | 53 | 147 | 72.50 % |
-| **Kubernetes (2 replicas)** | 143 | 57 | 53 | 147 | 72.50 % |
-
-Identical to the last prediction in all four. Per-image confidences match too
-(e.g. `cat_00013.jpg` → 0.6823 everywhere), so this is bitwise reproducibility,
-not a coincidence of rounding.
+Per-image confidences match too, so this is bitwise reproducibility, not a
+rounding coincidence. It is the check that catches serving-time preprocessing
+drift, a wrong class order in the artifact, or the wrong version deployed.
 
 **Serving latency** (client-observed, 400 requests each):
 
-| Environment | mean | p50 | p95 | max | server-side inference |
+| Deployment | mean | p50 | p95 | max | server-side inference |
 |---|---|---|---|---|---|
-| Local uvicorn (Windows, 8 threads) | 141 ms | 144 ms | 186 ms | 201 ms | 120 ms |
-| Kubernetes (Linux container, 1 thread/pod) | **84 ms** | 84 ms | 102 ms | 126 ms | 61 ms |
+| Local uvicorn (Windows, v1) | 141 ms | 144 ms | 186 ms | 201 ms | 120 ms |
+| Kubernetes (Linux container, v1) | **84 ms** | 84 ms | 102 ms | 126 ms | 61 ms |
+| Local uvicorn (Windows, v2 champion) | 142 ms | 141 ms | 165 ms | 198 ms | 125 ms |
 
-The containerised deployment is ~40 % faster per request despite being limited
-to a single torch thread — Linux + a slim image beats Windows-host Python here.
+ResNet18 is 29x larger than the baseline but serves at effectively the same
+latency, because inference cost on this input size is dominated by fixed
+overheads rather than by the parameter count.
 
-**Interpretation.** For a 4-conv-block CNN trained from scratch on 3,200 images,
-72.5 % is a reasonable baseline against a 50 % random floor. The binding
-constraints are dataset volume and model capacity, not the pipeline. Fine-tuning
-a pretrained ResNet18 would reach roughly 97 % on the same data; a from-scratch
-baseline was chosen deliberately so that such improvements can be measured
-against a known reference point.
+Full captured output, including both promotion decisions and the coverage
+breakdown, is in **[docs/EVIDENCE.md](docs/EVIDENCE.md)**.
 <!-- RESULTS_END -->
 
 Artifacts produced by a training run:
@@ -143,26 +160,34 @@ mlops-cats-dogs/
 │   │   ├── download_data.py     # fetch the dataset
 │   │   ├── preprocess.py        # resize + stratified split
 │   │   └── dataset.py           # Datasets/DataLoaders + augmentation
-│   ├── models/cnn.py            # BaselineCNN
-│   └── training/train.py        # training loop + MLflow tracking
+│   ├── models/
+│   │   ├── cnn.py               # BaselineCNN (from scratch)
+│   │   └── factory.py           # architecture registry: baseline | resnet18
+│   └── training/train.py        # training loop + MLflow tracking + registration
 ├── api/
 │   ├── main.py                  # FastAPI app: /health /predict /metrics
 │   ├── model_loader.py          # loads artifacts/model.pt once at startup
 │   ├── preprocessing.py         # inference-time transform
 │   └── monitoring.py            # request logging + metrics collector
-├── tests/
-│   ├── test_preprocessing.py    # 24 tests
-│   ├── test_inference.py        # 22 tests
-│   └── test_monitoring.py       # 11 tests
+├── tests/                       # 79 tests
+│   ├── test_preprocessing.py    # 24 - geometry, split, normalisation
+│   ├── test_inference.py        # 22 - model, service, HTTP contract
+│   ├── test_registry.py         # 22 - model factory + promotion gate
+│   └── test_monitoring.py       # 11 - counters, latency, log format
 ├── scripts/
+│   ├── promote_model.py         # gated champion promotion + export
+│   ├── register_model.py        # register/backfill a checkpoint
 │   ├── smoke_test.py            # post-deployment health + prediction gate
 │   ├── evaluate_deployed_model.py  # true vs predicted over real HTTP
 │   └── deploy_local.ps1         # build → minikube → deploy → smoke test
 ├── k8s/
 │   ├── deployment.yaml          # 2 replicas, probes, resource limits
 │   └── service.yaml             # NodePort 30080
+├── docs/
+│   ├── EVIDENCE.md              # captured verification output
+│   └── evidence/                # raw run logs, JUnit XML, coverage
 ├── .github/workflows/
-│   ├── ci.yml                   # test → build → smoke test → publish to GHCR
+│   ├── ci.yml                   # matrix tests → build → smoke test → GHCR
 │   └── cd.yml                   # minikube → deploy → smoke test → rollback
 ├── dvc.yaml / dvc.lock          # reproducible preprocess → train pipeline
 ├── params.yaml                  # every hyperparameter, one place
@@ -318,7 +343,59 @@ Then open <http://localhost:5000>.
 > MLflow 3.x put the plain-file store (`./mlruns`) into maintenance mode and
 > refuses to use it, so this project uses the SQLite backend (`mlflow.db`).
 
-### 4.6 The reproducible DVC pipeline
+### 4.6 MLflow Model Registry: gated promotion
+
+Every training run registers a new version of `cats-vs-dogs-classifier` and tags
+it `challenger`. **A run never promotes itself** — promotion is a separate,
+gated decision:
+
+```bash
+python scripts/promote_model.py --show      # list versions, metrics, aliases
+python scripts/promote_model.py --dry-run   # show the decision, change nothing
+python scripts/promote_model.py             # promote if the gate passes
+```
+
+```
+ ver  architecture        test_acc  test_f1    loss  aliases                run
+------------------------------------------------------------------------------
+   1  baseline_cnn          0.7250   0.7250  0.5633  -                      d604ad0f
+   2  resnet18_finetune     0.9750   0.9750  0.0654  champion               3594a3ac <<
+```
+
+The rule:
+
+```
+promote if   challenger.test_accuracy  >  champion.test_accuracy + min_delta
+```
+
+with `min_delta` defaulting to 0.005, so a marginal 0.2 pp gain does not churn
+production. Both outcomes are demonstrated in
+[docs/EVIDENCE.md](docs/EVIDENCE.md#11-promotion-is-gated-and-a-training-run-never-promotes-itself):
+v2 promoted over v1 (+0.2500) and v1 rejected against v2 (−0.2500).
+
+**Promotion is wired to serving.** Promoting a version exports its checkpoint to
+`artifacts/model.pt` — the file the Docker image bakes in — so only a promoted
+model can ever be served. `GET /health` reports the live `architecture` and
+`mlflow_run_id`, so the running service identifies exactly which registry
+version is answering requests.
+
+To register a checkpoint from an earlier run (backfill, or a run whose
+registration step failed while the training was fine):
+
+```bash
+python scripts/register_model.py --checkpoint artifacts/model.pt
+```
+
+Training a second candidate needs no edit to `params.yaml`:
+
+```bash
+python train.py --architecture resnet18_finetune --epochs 4 --learning-rate 0.005   --run-name resnet18-finetune --artifact-name resnet18_finetune.pt
+```
+
+Every override is logged to MLflow, so each run remains fully described by its
+own parameters.
+
+### 4.7 The reproducible DVC pipeline
 
 ```bash
 python -m dvc dag        # data/raw.dvc → preprocess → train
@@ -397,15 +474,20 @@ all 276 MB of data, `mlruns/`, `.git/` and the training-only source out.
 
 `.github/workflows/ci.yml`, on every push/PR to `main`:
 
-**Job 1 — `test`**
+**Job 1 — `test`** (matrix: Python **3.11** and **3.12**)
 1. Install pinned deps (`requirements-api.txt` + `requirements-dev.txt`) from the CPU wheel index
-2. Verify `artifacts/model.pt` exists and print its class order, run id and metrics
-3. Run pytest
+2. Inspect `artifacts/model.pt`: architecture, class order, run id, metrics, and the registry champion
+3. Run pytest with JUnit XML + coverage
+4. Render test and coverage tables onto the run page
+5. Upload `test-evidence-py3.11` / `test-evidence-py3.12` artifacts (JUnit XML, `coverage.xml`, HTML coverage, inspection log) — 90-day retention
 
 **Job 2 — `build-and-push`** (`needs: test`, so a red build can never publish)
 1. Build the image with Buildx + GitHub Actions layer cache
-2. Load it locally and **smoke test it** — `/health` must return `status: ok`, `/predict` must return a `predicted_label`
-3. Push to **GHCR** tagged `latest`, `sha-<commit>` and the branch name
+2. Report image size, layer count, run-as user and entrypoint
+3. Load it locally and **smoke test it** — `/health` must be `status: ok`, `/predict` must return a label, a non-image upload must be rejected with 400
+4. Render the actual prediction and metrics into the run summary
+5. Push to **GHCR** tagged `latest`, `sha-<commit>` and the branch name, and report the digest
+6. Upload `build-evidence` (the `/health`, `/predict`, `/metrics` responses and container logs)
 
 GHCR authenticates with the automatically-provided `GITHUB_TOKEN`, so **no
 manual secret is required**. (For Docker Hub instead, swap the login step for
@@ -502,8 +584,14 @@ echo $?    # -> 1
 4. `kubectl apply` the manifests
 5. **`kubectl set image`** — the actual deployment/update step
 6. `kubectl rollout status` — fails the job if pods never become ready
-7. **Run the smoke tests — non-zero exit fails the pipeline**
-8. On failure: `kubectl rollout undo` + dump pod logs
+7. **Assert `readyReplicas == spec.replicas`** — an explicit check, not just trusting the rollout message
+8. Capture `get all`, `describe deployment`, `describe service`, rollout history
+9. **Run the smoke tests — non-zero exit fails the pipeline**
+10. Run the post-deployment evaluation and record accuracy + latency
+11. Capture pod logs and live `/metrics`
+12. Render a verification table onto the run page
+13. On failure: capture pod logs and describes **first**, then `kubectl rollout undo`
+14. Upload `deployment-evidence` with every captured file — 90-day retention
 
 Deploying a SHA tag rather than `:latest` is what makes the deployment
 reproducible and a rollback meaningful.
@@ -617,6 +705,8 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 
 ## 10. Requirement checklist
 
+Rows in *italics* go beyond the stated requirements.
+
 | # | Requirement | Where |
 |---|---|---|
 | **M1** | Git source versioning | repo history, one commit per step |
@@ -631,6 +721,9 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 | | MLflow metrics | per-epoch + final test metrics |
 | | Confusion matrix | `artifacts/confusion_matrix.png` |
 | | Loss curves | `artifacts/training_curves.png` |
+| | *MLflow Model Registry* | `cats-vs-dogs-classifier`, 2 versions, `champion` alias |
+| | *Gated promotion* | `scripts/promote_model.py` — accuracy gate + export |
+| | *Model comparison* | v1 72.50 % vs v2 97.50 %, both registered |
 | **M2** | FastAPI service | `api/main.py` |
 | | `GET /health` | `api/main.py::health` |
 | | `POST /predict` | `api/main.py::predict` |
@@ -646,6 +739,9 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 | | Automated testing | `ci.yml` → job `test` |
 | | Docker image build | `ci.yml` → job `build-and-push` |
 | | Publish to registry | GHCR, `latest` + `sha-<commit>` |
+| | *Test matrix* | Python 3.11 + 3.12 |
+| | *Uploaded evidence* | JUnit XML, coverage, image smoke-test responses |
+| | *Run summaries* | rendered tables on every run page |
 | **M4** | K8s Deployment | `k8s/deployment.yaml` |
 | | K8s Service | `k8s/service.yaml` |
 | | CD workflow | `.github/workflows/cd.yml` |
@@ -654,6 +750,9 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 | | Health smoke test | `smoke_test.py::check_health` |
 | | Prediction smoke test | `smoke_test.py::check_prediction` |
 | | Fail pipeline on smoke failure | `sys.exit(1)` → fails the CD job |
+| | *Replica assertion* | `readyReplicas == spec.replicas` check |
+| | *Automatic rollback* | `kubectl rollout undo` on failure |
+| | *Captured deployment evidence* | `deployment-evidence` artifact per run |
 | **M5** | Request/response logging | `api/monitoring.py` + middleware |
 | | Request count | `/metrics` → `requests.total` |
 | | Latency tracking | `/metrics` → `latency_ms` p50/p95/p99 |
@@ -662,6 +761,7 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 | | True vs predicted comparison | confusion matrix in that script |
 | | Final packaging + README | this file |
 | | Demonstration workflow | §9 |
+| | *Captured evidence* | [docs/EVIDENCE.md](docs/EVIDENCE.md) |
 
 ---
 

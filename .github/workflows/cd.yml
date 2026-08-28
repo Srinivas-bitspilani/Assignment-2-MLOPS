@@ -2,14 +2,19 @@ name: CD
 
 # Continuous Deployment.
 #
-# Triggered automatically when the CI workflow finishes successfully on main,
-# so a commit flows: tests -> image published -> deployed -> smoke tested.
-# Can also be run manually against a chosen image tag.
+# Triggered automatically when CI finishes successfully on main, so a commit
+# flows: tests -> image published -> deployed -> smoke tested -> evaluated.
 #
-# The cluster is a Minikube instance created inside the runner. That keeps the
-# whole pipeline self-contained and reproducible for grading, and it is the same
-# `kubectl apply` / `kubectl set image` / `kubectl rollout status` sequence you
-# would run against a real cluster.
+# Evidence produced by every run (downloadable for 90 days):
+#   * kubectl describe / get output for deployment, pods and service
+#   * the rollout history
+#   * full smoke-test stdout
+#   * post-deployment evaluation report (JSON)
+#   * pod logs showing the structured request log
+# Plus a rendered summary table on the run page.
+#
+# The cluster is a Minikube instance inside the runner: the same
+# apply / set image / rollout status sequence a real cluster needs.
 
 on:
   workflow_run:
@@ -33,7 +38,6 @@ jobs:
   deploy:
     name: Deploy to Kubernetes and smoke test
     runs-on: ubuntu-latest
-    # Never deploy a red build.
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
@@ -56,7 +60,6 @@ jobs:
           else
             TAG="sha-${{ github.sha }}"
           fi
-          # GHCR requires an all-lowercase repository path.
           REPO=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           echo "reference=${REPO}:${TAG}" >> $GITHUB_OUTPUT
           echo "Deploying image: ${REPO}:${TAG}"
@@ -68,13 +71,22 @@ jobs:
           cpus: 2
           memory: 4096m
 
-      - name: Show cluster info
+      - name: Record cluster info
         run: |
-          kubectl cluster-info
-          kubectl get nodes -o wide
+          mkdir -p evidence
+          kubectl cluster-info | tee evidence/cluster-info.txt
+          kubectl get nodes -o wide | tee evidence/nodes.txt
+          {
+            echo "### Cluster"
+            echo ""
+            echo '```'
+            kubectl version --short 2>/dev/null || kubectl version
+            echo ""
+            kubectl get nodes -o wide
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
 
-      - name: Log in to GHCR and create a pull secret
-        # Needed because a freshly published GHCR package is private by default.
+      - name: Create a GHCR pull secret
         run: |
           kubectl create secret docker-registry ghcr-credentials \
             --docker-server=${{ env.REGISTRY }} \
@@ -84,57 +96,152 @@ jobs:
 
       - name: Apply the Kubernetes manifests
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          # Attach the pull secret to the pod spec.
+          kubectl apply -f k8s/deployment.yaml | tee evidence/apply.txt
+          kubectl apply -f k8s/service.yaml   | tee -a evidence/apply.txt
           kubectl patch deployment ${{ env.DEPLOYMENT }} \
             --type=strategic \
             -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr-credentials"}]}}}}'
 
-      - name: Update the image (this is the actual deployment step)
+      - name: Update the image (the deployment step)
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT }} \
-            api=${{ steps.image.outputs.reference }} \
-            --record=false
+            api=${{ steps.image.outputs.reference }}
           kubectl annotate deployment/${{ env.DEPLOYMENT }} \
             kubernetes.io/change-cause="CD run ${{ github.run_number }}: ${{ steps.image.outputs.reference }}" \
             --overwrite
 
       - name: Wait for the rollout to finish
         run: |
-          # Fails the job if the new pods never become ready.
-          kubectl rollout status deployment/${{ env.DEPLOYMENT }} --timeout=300s
+          kubectl rollout status deployment/${{ env.DEPLOYMENT }} --timeout=300s \
+            | tee evidence/rollout.txt
 
-      - name: Show what is running
+      - name: Assert the deployment is fully available
+        # An explicit assertion rather than trusting the rollout message.
         run: |
-          kubectl get deployment,pods,svc -o wide
-          kubectl describe deployment ${{ env.DEPLOYMENT }} | sed -n '1,40p'
+          set -e
+          DESIRED=$(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.spec.replicas}')
+          READY=$(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.status.readyReplicas}')
+          echo "ready=$READY desired=$DESIRED"
+          test "$READY" = "$DESIRED" || { echo "::error::only $READY/$DESIRED replicas ready"; exit 1; }
+          echo "REPLICAS=$READY/$DESIRED" >> $GITHUB_ENV
 
-      - name: Install smoke-test dependencies
+      - name: Capture cluster state
+        run: |
+          kubectl get deployment,rs,pods,svc -o wide       | tee evidence/get-all.txt
+          kubectl describe deployment ${{ env.DEPLOYMENT }} | tee evidence/describe-deployment.txt
+          kubectl describe service ${{ env.SERVICE }}       | tee evidence/describe-service.txt
+          kubectl rollout history deployment/${{ env.DEPLOYMENT }} | tee evidence/rollout-history.txt
+          {
+            echo ""
+            echo "### Deployment"
+            echo ""
+            echo "| property | value |"
+            echo "|---|---|"
+            echo "| image | \`${{ steps.image.outputs.reference }}\` |"
+            echo "| replicas ready | **$REPLICAS** |"
+            echo "| service type | $(kubectl get svc ${{ env.SERVICE }} -o jsonpath='{.spec.type}') |"
+            echo "| node port | $(kubectl get svc ${{ env.SERVICE }} -o jsonpath='{.spec.ports[0].nodePort}') |"
+            echo "| strategy | $(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.spec.strategy.type}'), maxUnavailable=$(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.spec.strategy.rollingUpdate.maxUnavailable}') |"
+            echo ""
+            echo '```'
+            kubectl get deployment,pods,svc -o wide
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Install evaluation dependencies
         run: python -m pip install --quiet requests pillow
 
       - name: Run smoke tests
-        # THE GATE: a non-zero exit here fails the whole CD pipeline, so a
-        # deployment that does not actually serve predictions is never accepted.
+        # THE GATE: a non-zero exit fails the whole CD pipeline, so a deployment
+        # that cannot actually serve predictions is never accepted.
+        id: smoke
         run: |
           set -e
           URL=$(minikube service ${{ env.SERVICE }} --url | head -1)
+          echo "SERVICE_URL=$URL" >> $GITHUB_ENV
           echo "Service URL: $URL"
-          python scripts/smoke_test.py --base-url "$URL" --retries 30 --delay 2
+          python scripts/smoke_test.py --base-url "$URL" --retries 30 --delay 2 \
+            2>&1 | tee evidence/smoke-test.txt
 
-      - name: Roll back if the smoke tests failed
+      - name: Post-deployment evaluation
+        # Sends simulated traffic through the Service and records latency and
+        # the true-vs-predicted breakdown. DVC data is not checked out in CI, so
+        # this runs in simulated mode and says so in its own output.
+        run: |
+          set -e
+          python scripts/evaluate_deployed_model.py \
+            --base-url "$SERVICE_URL" -n 25 \
+            --output evidence/deployment_evaluation.json \
+            2>&1 | tee evidence/evaluation.txt
+
+      - name: Capture pod logs and live metrics
+        run: |
+          kubectl logs -l app=${{ env.DEPLOYMENT }} --tail=200 --all-containers \
+            > evidence/pod-logs.txt 2>&1 || true
+          curl -fs "$SERVICE_URL/metrics" -o evidence/live-metrics.json || true
+          curl -fs "$SERVICE_URL/metrics/prometheus" -o evidence/live-metrics.prom || true
+
+      - name: Render verification summary
+        if: always()
+        run: |
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import json, pathlib, re
+          ev = pathlib.Path("evidence")
+          print("\n### Smoke tests\n")
+          smoke = (ev / "smoke-test.txt")
+          if smoke.exists():
+              text = smoke.read_text(errors="replace")
+              print("| check | result |")
+              print("|---|---|")
+              for name in ("health", "prediction", "error_handling", "real_images"):
+                  m = re.search(rf"^\s+{name}\s+(PASS|FAIL)", text, re.M)
+                  if m:
+                      print(f"| {name} | **{m.group(1)}** |")
+              overall = "PASSED" if "ALL SMOKE TESTS PASSED" in text else "FAILED"
+              print(f"| overall | **{overall}** |")
+          rep = ev / "deployment_evaluation.json"
+          if rep.exists():
+              r = json.loads(rep.read_text())
+              lat = r["latency_ms"]
+              print("\n### Post-deployment evaluation\n")
+              print("| metric | value |")
+              print("|---|---|")
+              print(f"| mode | {r['mode']} |")
+              print(f"| requests | {r['requests']['answered']}/{r['requests']['sent']} answered, {r['requests']['failed']} failed |")
+              print(f"| accuracy | {r['accuracy']:.2%} {'' if r['accuracy_is_meaningful'] else '(simulated inputs: not meaningful)'} |")
+              print(f"| latency mean / p95 | {lat['mean']} ms / {lat['p95']} ms |")
+              print(f"| deployed run id | `{str(r['deployed_model']['mlflow_run_id'])[:8]}` |")
+          logs = ev / "pod-logs.txt"
+          if logs.exists():
+              lines = [l for l in logs.read_text(errors="replace").splitlines() if '"event"' in l]
+              print(f"\n### Structured pod logs ({len(lines)} JSON events captured)\n")
+              print('```json')
+              for l in lines[-4:]:
+                  print(l.strip()[:220])
+              print('```')
+          PY
+
+      - name: Roll back if anything failed
         if: failure()
         run: |
-          echo "::error::Smoke tests failed - rolling back to the previous revision"
+          echo "::error::Deployment verification failed - rolling back"
           kubectl rollout undo deployment/${{ env.DEPLOYMENT }} || true
-          kubectl get pods
-          echo "--- pod logs ---"
-          kubectl logs -l app=${{ env.DEPLOYMENT }} --tail=100 --all-containers || true
+          kubectl get pods -o wide | tee evidence/failure-pods.txt || true
+          kubectl logs -l app=${{ env.DEPLOYMENT }} --tail=100 --all-containers \
+            > evidence/failure-logs.txt 2>&1 || true
+          kubectl describe pods -l app=${{ env.DEPLOYMENT }} \
+            > evidence/failure-describe.txt 2>&1 || true
+          {
+            echo ""
+            echo "### Rollback executed"
+            echo ""
+            echo "Smoke tests or the rollout failed, so \`kubectl rollout undo\` was run."
+          } >> $GITHUB_STEP_SUMMARY
 
-      - name: Deployment summary
-        if: success()
-        run: |
-          echo "### Deployment successful" >> $GITHUB_STEP_SUMMARY
-          echo "- Image: \`${{ steps.image.outputs.reference }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Replicas: $(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.status.readyReplicas}')/$(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.spec.replicas}') ready" >> $GITHUB_STEP_SUMMARY
-          echo "- Smoke tests: passed" >> $GITHUB_STEP_SUMMARY
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-evidence
+          path: evidence/
+          retention-days: 90

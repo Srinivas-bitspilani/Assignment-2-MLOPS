@@ -1,0 +1,24 @@
+================================================================================================
+MLFLOW MODEL REGISTRY  'cats-vs-dogs-classifier'
+================================================================================================
+ ver  architecture        test_acc  test_f1    loss  aliases                run
+------------------------------------------------------------------------------------------------
+   1  baseline_cnn          0.7250   0.7250  0.5633  champion               d604ad0f <<
+   2  resnet18_finetune     0.9750   0.9750  0.0654  challenger             3594a3ac
+
+DECISION
+  candidate : v2 (resnet18_finetune) acc=0.9750
+  champion  : v1 (baseline_cnn) acc=0.7250
+  reason    : challenger v2 accuracy 0.9750 vs champion v1 0.7250 (margin +0.2500, required > 0.005)
+  outcome   : PROMOTE
+
+  alias 'champion' -> v2
+  exported resnet18_finetune.pt -> model.pt (44.79 MB)
+
+ ver  architecture        test_acc  test_f1    loss  aliases                run
+------------------------------------------------------------------------------------------------
+   1  baseline_cnn          0.7250   0.7250  0.5633  -                      d604ad0f
+   2  resnet18_finetune     0.9750   0.9750  0.0654  challenger,champion    3594a3ac <<
+
+  registry record -> C:\Users\ADMIN\OneDrive - aapmor.com\Desktop\MLOPSASSIGNMENT\artifacts\model_registry.json
+================================================================================================

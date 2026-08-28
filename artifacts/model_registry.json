@@ -1,0 +1,52 @@
+{
+  "registered_model": "cats-vs-dogs-classifier",
+  "total_versions": 2,
+  "champion": {
+    "version": 2,
+    "architecture": "resnet18_finetune",
+    "test_accuracy": 0.975,
+    "test_f1": 0.975,
+    "test_loss": 0.0654,
+    "best_epoch": "4",
+    "source_run_id": "3594a3ace0f9427998c21a6468c8236e",
+    "aliases": [
+      "champion"
+    ],
+    "created": 1787939378803
+  },
+  "decision": {
+    "candidate_version": 1,
+    "candidate_accuracy": 0.725,
+    "champion_version_before": 2,
+    "champion_accuracy_before": 0.975,
+    "min_delta": 0.005,
+    "promoted": false,
+    "reason": "challenger v1 accuracy 0.7250 vs champion v2 0.9750 (margin -0.2500, required > 0.005)"
+  },
+  "versions": [
+    {
+      "version": 1,
+      "architecture": "baseline_cnn",
+      "test_accuracy": 0.725,
+      "test_f1": 0.725,
+      "test_loss": 0.5633,
+      "best_epoch": "8",
+      "source_run_id": "d604ad0f8b8a4a72b29b45d8789bfd89",
+      "aliases": [],
+      "created": 1787939330628
+    },
+    {
+      "version": 2,
+      "architecture": "resnet18_finetune",
+      "test_accuracy": 0.975,
+      "test_f1": 0.975,
+      "test_loss": 0.0654,
+      "best_epoch": "4",
+      "source_run_id": "3594a3ace0f9427998c21a6468c8236e",
+      "aliases": [
+        "champion"
+      ],
+      "created": 1787939378803
+    }
+  ]
+}

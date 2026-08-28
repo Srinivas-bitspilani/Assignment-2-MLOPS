@@ -1,4 +1,5 @@
 # Test-only dependencies (M3). Installed in CI on top of requirements-api.txt.
 pytest==9.1.1
+pytest-cov==7.1.0
 httpx==0.28.1
 requests==2.34.2

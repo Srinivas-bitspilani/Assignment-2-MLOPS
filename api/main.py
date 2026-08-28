@@ -50,6 +50,7 @@ class HealthResponse(BaseModel):
     status: str = Field(..., examples=["ok"])
     api_version: str
     model_loaded: bool
+    architecture: str | None = Field(None, examples=["resnet18_finetune"])
     classes: list[str] = Field(default_factory=list)
     image_size: int | None = None
     mlflow_run_id: str | None = None
@@ -194,6 +195,7 @@ def health() -> JSONResponse:
             status="ok",
             api_version=API_VERSION,
             model_loaded=True,
+            architecture=info.get("architecture"),
             classes=info["classes"],
             image_size=info["image_size"],
             mlflow_run_id=info["mlflow_run_id"],

@@ -27,7 +27,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from api.preprocessing import preprocess  # noqa: E402
-from src.models.cnn import BaselineCNN  # noqa: E402
+from src.models.factory import build_from_config  # noqa: E402
 
 # Overridable so the container / tests can point at a different artifact.
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[1] / "artifacts" / "model.pt"
@@ -68,19 +68,24 @@ class ModelService:
         # weights_only=False: our checkpoint stores config dicts, not just tensors.
         checkpoint = torch.load(self.model_path, map_location="cpu", weights_only=False)
 
-        model_config = checkpoint["model_config"]
+        model_config = dict(checkpoint["model_config"])
         self.classes = list(checkpoint["classes"])
         self.data_config = checkpoint["data_config"]
         self.metrics = checkpoint.get("metrics", {})
         self.mlflow_run_id = checkpoint.get("mlflow_run_id")
 
-        model = BaselineCNN(
-            num_classes=int(model_config["num_classes"]),
-            conv_blocks=int(model_config["conv_blocks"]),
-            base_filters=int(model_config["base_filters"]),
-            dropout=float(model_config["dropout"]),
-            in_channels=int(self.data_config.get("channels", 3)),
+        # Which architecture the promoted champion actually is. Older
+        # checkpoints predate this field, so fall back to the baseline.
+        self.architecture = checkpoint.get(
+            "architecture", model_config.get("architecture", "baseline_cnn")
         )
+        model_config["architecture"] = self.architecture
+
+        # pretrained=False: the weights come from the checkpoint, so the
+        # container must never try to download ImageNet weights at startup.
+        model_config["pretrained"] = False
+
+        model = build_from_config(model_config, self.data_config)
         model.load_state_dict(checkpoint["state_dict"])
         model.eval()  # disables dropout / freezes batch-norm statistics
 
@@ -127,6 +132,7 @@ class ModelService:
         return {
             "model_path": str(self.model_path),
             "model_loaded": self.is_loaded,
+            "architecture": getattr(self, "architecture", None),
             "classes": self.classes,
             "image_size": self.data_config.get("image_size"),
             "mlflow_run_id": self.mlflow_run_id,

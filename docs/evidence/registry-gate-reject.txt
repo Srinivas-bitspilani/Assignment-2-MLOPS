@@ -1,0 +1,16 @@
+================================================================================================
+MLFLOW MODEL REGISTRY  'cats-vs-dogs-classifier'
+================================================================================================
+ ver  architecture        test_acc  test_f1    loss  aliases                run
+------------------------------------------------------------------------------------------------
+   1  baseline_cnn          0.7250   0.7250  0.5633  -                      d604ad0f
+   2  resnet18_finetune     0.9750   0.9750  0.0654  champion               3594a3ac <<
+
+DECISION
+  candidate : v1 (baseline_cnn) acc=0.7250
+  champion  : v2 (resnet18_finetune) acc=0.9750
+  reason    : challenger v1 accuracy 0.7250 vs champion v2 0.9750 (margin -0.2500, required > 0.005)
+  outcome   : REJECT  (dry run, nothing changed)
+
+  registry record -> C:\Users\ADMIN\OneDrive - aapmor.com\Desktop\MLOPSASSIGNMENT\artifacts\model_registry.json
+================================================================================================

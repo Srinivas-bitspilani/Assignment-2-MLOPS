@@ -37,6 +37,10 @@ train:
   early_stopping_patience: 3
 
 model:
+  # Architecture selector, resolved by src/models/factory.py. Override on the
+  # command line to train a different candidate:
+  #   python train.py --architecture resnet18_finetune
+  architecture: baseline_cnn        # baseline_cnn | resnet18_finetune
   name: baseline_cnn
   conv_blocks: 4                    # 32 -> 64 -> 128 -> 256 filters
   base_filters: 32
@@ -44,6 +48,11 @@ model:
   num_classes: 2
   artifact_dir: artifacts
   artifact_name: model.pt
+  # resnet18_finetune only: freeze the ImageNet backbone so just the 2-class
+  # head trains. Backward touches ~1k parameters instead of 11.7M, which is
+  # what makes fine-tuning practical on CPU.
+  freeze_backbone: true
+  pretrained: true
 
 mlflow:
   # MLflow 3.x put the plain-file store into maintenance mode and refuses it,
@@ -53,3 +62,9 @@ mlflow:
   artifact_location: mlartifacts
   experiment_name: cats-vs-dogs
   run_name: baseline-cnn
+  # MLflow Model Registry: every training run registers a new version of this
+  # model. scripts/promote_model.py decides which version carries the
+  # 'champion' alias, and only the champion is exported for serving.
+  registered_model_name: cats-vs-dogs-classifier
+  champion_alias: champion
+  challenger_alias: challenger

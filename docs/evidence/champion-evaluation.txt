@@ -1,0 +1,42 @@
+========================================================================
+POST-DEPLOYMENT EVALUATION  ->  http://127.0.0.1:8300
+========================================================================
+service classes      : ['cat', 'dog']
+deployed mlflow run  : 3594a3ace0f9427998c21a6468c8236e
+training test_accuracy: 0.975
+
+mode                 : real
+requests to send     : 400
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+requests answered    : 400/400 (failures: 0)
+wall time            : 56.7s (7.05 req/s)
+
+TRUE vs PREDICTED (confusion matrix)
+  true \ pred       cat     dog     total
+  cat               195       5       200
+  dog                 5     195       200
+
+PER-CLASS RECALL
+  cat     195/200  = 97.50%
+  dog     195/200  = 97.50%
+
+OVERALL ACCURACY     : 390/400 = 97.50%
+
+LATENCY (client-observed round trip)
+  mean    141.6 ms
+  p50     141.3 ms
+  p95     165.0 ms
+  max     197.7 ms
+  server-side inference mean: 124.7 ms
+  mean confidence           : 0.9809
+
+SERVICE /metrics SNAPSHOT
+  requests total   : 404
+  errors total     : 0
+  predictions total: 402
+  by label         : {'cat': 201, 'dog': 201}
+  latency p95      : 152.61 ms
+
+report written -> C:\Users\ADMIN\OneDrive - aapmor.com\Desktop\MLOPSASSIGNMENT\artifacts\deployment_evaluation.json
+========================================================================

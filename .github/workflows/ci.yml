@@ -1,8 +1,17 @@
 name: CI
 
 # Runs on every push and pull request to main.
-# Stage 1 (test) must pass before stage 2 (build & publish) starts, so a broken
-# model or API can never produce a published image.
+#
+# Evidence produced by every run (downloadable from the run page for 90 days):
+#   * JUnit XML test report per Python version
+#   * coverage.xml + HTML coverage report
+#   * the model-artifact inspection log
+#   * the built image digest and tag list
+# Each job also writes a rendered summary table to the run page itself, so the
+# results are visible without downloading anything.
+#
+# Gate: build-and-push has `needs: test`, so a red test suite can never produce
+# a published image.
 
 on:
   push:
@@ -17,45 +26,142 @@ env:
 
 jobs:
   # ------------------------------------------------------------------ #
-  # 1. dependency installation + automated tests
+  # 1. dependency installation + automated tests (matrix)
   # ------------------------------------------------------------------ #
   test:
-    name: Pytest (preprocessing + inference)
+    name: Tests (py${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false            # report every version, not just the first failure
+      matrix:
+        python-version: ["3.11", "3.12"]
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
           cache: pip
 
       - name: Install dependencies
-        # The CPU wheel index keeps torch at ~200 MB instead of ~2.5 GB,
-        # which turns a ~6 minute install into well under a minute.
+        # The CPU wheel index keeps torch at ~200 MB instead of ~2.5 GB.
         run: |
           python -m pip install --upgrade pip
           pip install --extra-index-url https://download.pytorch.org/whl/cpu \
             -r requirements-api.txt -r requirements-dev.txt
 
-      - name: Show environment
+      - name: Record environment
         run: |
-          python --version
-          python -c "import torch, torchvision; print('torch', torch.__version__, '| torchvision', torchvision.__version__)"
+          {
+            echo "### Environment (py${{ matrix.python-version }})"
+            echo ""
+            echo '```'
+            python --version
+            python -c "import torch, torchvision; print('torch', torch.__version__, '| torchvision', torchvision.__version__)"
+            python -c "import fastapi, pydantic; print('fastapi', fastapi.__version__, '| pydantic', pydantic.VERSION)"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
 
-      - name: Verify the model artifact is present
-        # The image cannot be built without it, so fail early and clearly.
+      - name: Inspect the model artifact
+        # Proves the committed artifact is loadable and reports which registry
+        # version / architecture is about to be shipped.
         run: |
-          test -f artifacts/model.pt || { echo "::error::artifacts/model.pt missing - run 'python train.py' and commit it"; exit 1; }
-          python -c "import torch; c=torch.load('artifacts/model.pt', map_location='cpu', weights_only=False); print('classes:', c['classes']); print('run_id:', c.get('mlflow_run_id')); print('metrics:', c.get('metrics'))"
+          set -e
+          test -f artifacts/model.pt || { echo "::error::artifacts/model.pt missing - run 'python train.py'"; exit 1; }
+          python - <<'PY' | tee model-inspection.txt
+          import torch, json, pathlib
+          c = torch.load("artifacts/model.pt", map_location="cpu", weights_only=False)
+          print("architecture :", c.get("architecture", "baseline_cnn"))
+          print("classes      :", c["classes"])
+          print("image_size   :", c["data_config"]["image_size"])
+          print("normalize    :", c["data_config"]["normalize"])
+          print("mlflow_run   :", c.get("mlflow_run_id"))
+          print("metrics      :", json.dumps({k: round(float(v), 4) for k, v in c.get("metrics", {}).items()}))
+          print("tensors      :", len(c["state_dict"]))
+          size = pathlib.Path("artifacts/model.pt").stat().st_size / 1e6
+          print(f"size_mb      : {size:.2f}")
+          reg = pathlib.Path("artifacts/model_registry.json")
+          if reg.exists():
+              r = json.loads(reg.read_text())
+              ch = r.get("champion") or {}
+              print("registry     :", r["registered_model"], "| versions:", r["total_versions"])
+              print("champion     : v%s (%s) acc=%s" % (ch.get("version"), ch.get("architecture"), ch.get("test_accuracy")))
+          PY
 
-      - name: Run tests
-        run: python -m pytest -v --tb=short
+      - name: Run tests with coverage
+        run: |
+          python -m pytest -v \
+            --junitxml=junit-py${{ matrix.python-version }}.xml \
+            --cov=api --cov=src \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:htmlcov \
+            --cov-report=term
+
+      - name: Render test summary
+        if: always()
+        run: |
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import glob, xml.etree.ElementTree as ET, os
+          files = glob.glob("junit-*.xml")
+          print(f"### Test results (py{os.environ['PYVER']})\n")
+          if not files:
+              print("No JUnit report produced.")
+          for f in files:
+              s = ET.parse(f).getroot()
+              node = s if s.tag == "testsuite" else s.find("testsuite")
+              a = node.attrib
+              total = int(a.get("tests", 0)); fail = int(a.get("failures", 0))
+              err = int(a.get("errors", 0)); skip = int(a.get("skipped", 0))
+              print("| total | passed | failed | errors | skipped | time |")
+              print("|---|---|---|---|---|---|")
+              print(f"| {total} | **{total-fail-err-skip}** | {fail} | {err} | {skip} | {float(a.get('time',0)):.2f}s |")
+              print("")
+              per = {}
+              for tc in node.iter("testcase"):
+                  per.setdefault(tc.get("classname","").split(".")[-1], []).append(tc)
+              print("| test module | tests |")
+              print("|---|---|")
+              for mod, cases in sorted(per.items()):
+                  print(f"| `{mod}` | {len(cases)} |")
+          PY
+        env:
+          PYVER: ${{ matrix.python-version }}
+
+      - name: Render coverage summary
+        if: always()
+        run: |
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import xml.etree.ElementTree as ET, pathlib
+          p = pathlib.Path("coverage.xml")
+          if not p.exists():
+              print("\nNo coverage report produced.")
+          else:
+              r = ET.parse(p).getroot()
+              rate = float(r.get("line-rate", 0)) * 100
+              print(f"\n### Coverage: **{rate:.1f}%** of lines\n")
+              print("| package | line coverage |")
+              print("|---|---|")
+              for pkg in r.iter("package"):
+                  print(f"| `{pkg.get('name')}` | {float(pkg.get('line-rate',0))*100:.1f}% |")
+          PY
+
+      - name: Upload test + coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence-py${{ matrix.python-version }}
+          path: |
+            junit-*.xml
+            coverage.xml
+            htmlcov/
+            model-inspection.txt
+          retention-days: 90
 
   # ------------------------------------------------------------------ #
-  # 2. build the Docker image and publish it to GHCR
+  # 2. build the Docker image, smoke test it, publish it to GHCR
   # ------------------------------------------------------------------ #
   build-and-push:
     name: Build & publish image
@@ -63,7 +169,7 @@ jobs:
     needs: test                       # gate: no green tests, no image
     permissions:
       contents: read
-      packages: write                 # required to push to GHCR
+      packages: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -72,7 +178,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        # GITHUB_TOKEN is provided automatically - no manual secret needed.
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -93,10 +198,24 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          load: true                  # keep it local first, do not push yet
+          load: true
           tags: cats-dogs-api:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Report image size and layers
+        run: |
+          {
+            echo "### Built image"
+            echo ""
+            echo "| property | value |"
+            echo "|---|---|"
+            echo "| size | $(docker image inspect cats-dogs-api:ci --format '{{.Size}}' | awk '{printf "%.2f GB", $1/1000000000}') |"
+            echo "| layers | $(docker image inspect cats-dogs-api:ci --format '{{len .RootFS.Layers}}') |"
+            echo "| base | python:3.12-slim |"
+            echo "| user | $(docker image inspect cats-dogs-api:ci --format '{{.Config.User}}') |"
+            echo "| entrypoint | \`$(docker image inspect cats-dogs-api:ci --format '{{join .Config.Cmd " "}}')\` |"
+          } >> $GITHUB_STEP_SUMMARY
 
       - name: Create a sample image for the smoke test
         run: |
@@ -115,15 +234,48 @@ jobs:
           done
           echo "--- /health ---"
           curl -fs http://localhost:8000/health | tee health.json
+          echo ""
           grep -q '"status":"ok"' health.json
           echo "--- /predict ---"
           curl -fs -F "file=@sample.jpg" http://localhost:8000/predict | tee predict.json
+          echo ""
           grep -q 'predicted_label' predict.json
-          docker logs api
+          echo "--- /metrics ---"
+          curl -fs http://localhost:8000/metrics | tee metrics.json
+          echo ""
+          echo "--- rejects a non-image with 400 ---"
+          code=$(curl -s -o reject.json -w '%{http_code}' -F "file=@README.md" http://localhost:8000/predict)
+          echo "HTTP $code"
+          test "$code" = "400"
+          echo "--- container logs ---"
+          docker logs api 2>&1 | tee container.log
           docker rm -f api
 
+      - name: Render smoke-test summary
+        if: always()
+        run: |
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import json, pathlib
+          print("\n### Image smoke test\n")
+          def load(name):
+              p = pathlib.Path(name)
+              return json.loads(p.read_text()) if p.exists() else None
+          h, pr, m = load("health.json"), load("predict.json"), load("metrics.json")
+          print("| check | result |")
+          print("|---|---|")
+          if h:
+              print(f"| `GET /health` | status=**{h.get('status')}**, model_loaded={h.get('model_loaded')}, arch=`{h.get('architecture')}` |")
+              print(f"| deployed model | run `{str(h.get('mlflow_run_id'))[:8]}`, training accuracy **{h.get('test_accuracy')}** |")
+          if pr:
+              print(f"| `POST /predict` | label=**{pr.get('predicted_label')}**, confidence={pr.get('confidence'):.4f}, {pr.get('inference_time_ms')} ms |")
+              print(f"| probabilities | `{json.dumps(pr.get('probabilities'))}` |")
+          print("| non-image upload | rejected with **HTTP 400** |")
+          if m:
+              print(f"| `GET /metrics` | {m['requests']['total']} requests, p95 {m['latency_ms']['p95']} ms |")
+          PY
+
       - name: Push image to GHCR
-        # Only reached when the image passed its smoke test.
+        id: push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -132,9 +284,33 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
 
-      - name: Summary
+      - name: Render publish summary
         run: |
-          echo "### Published image tags" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo ""
+            echo "### Published to GHCR"
+            echo ""
+            echo "Digest: \`${{ steps.push.outputs.digest }}\`"
+            echo ""
+            echo "Tags:"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+            echo ""
+            echo "Pull it:"
+            echo '```bash'
+            echo "docker pull ${{ env.REGISTRY }}/${{ github.repository }}:sha-${{ github.sha }}"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-evidence
+          path: |
+            health.json
+            predict.json
+            metrics.json
+            container.log
+          retention-days: 90

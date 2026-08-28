@@ -21,6 +21,11 @@ env/
 !/artifacts/confusion_matrix.png
 !/artifacts/classification_report.txt
 !/artifacts/deployment_evaluation.json
+!/artifacts/model_registry.json
+!/artifacts/resnet18_finetune_metrics.json
+!/artifacts/resnet18_finetune_training_curves.png
+!/artifacts/resnet18_finetune_confusion_matrix.png
+!/artifacts/resnet18_finetune_classification_report.txt
 
 # ---- MLflow local tracking store ----
 mlruns/

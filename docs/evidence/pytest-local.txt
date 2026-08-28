@@ -1,0 +1,22 @@
+﻿Name                        Stmts   Miss  Cover
+-----------------------------------------------
+api\main.py                   101     12    88%
+api\model_loader.py            67      0   100%
+api\monitoring.py              80      3    96%
+api\preprocessing.py           23      0   100%
+src\__init__.py                 0      0   100%
+src\config.py                  14      4    71%
+src\data\__init__.py            0      0   100%
+src\data\dataset.py            68     38    44%
+src\data\download_data.py      94     94     0%
+src\data\preprocess.py         61     34    44%
+src\inference\__init__.py       0      0   100%
+src\models\__init__.py          0      0   100%
+src\models\cnn.py              66     23    65%
+src\models\factory.py          29      0   100%
+src\training\__init__.py        0      0   100%
+src\training\train.py         253    224    11%
+-----------------------------------------------
+TOTAL                         856    432    50%
+Coverage XML written to file docs/evidence/coverage.xml
+============================= 79 passed in 19.94s =============================

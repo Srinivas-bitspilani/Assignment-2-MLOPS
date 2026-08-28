@@ -1,0 +1,40 @@
+MLFLOW EXPERIMENT 'cats-vs-dogs'  (3 runs)
+================================================================================================
+
+run 27765032869141ec9e3e53cd1a1769c1  'baseline-cnn'  status=RUNNING
+  architecture      : None
+  epochs / lr       : 10 / 0.001
+  params logged     : 41
+  trainable params  : 389410 of None
+  test_accuracy     : None
+  test_f1           : None
+  best_epoch        : None
+  registered version: None
+  artifacts         : []
+
+run d604ad0f8b8a4a72b29b45d8789bfd89  'baseline-cnn'  status=FINISHED
+  architecture      : None
+  epochs / lr       : 10 / 0.001
+  params logged     : 41
+  trainable params  : 389410 of None
+  test_accuracy     : 0.725
+  test_f1           : 0.7249724972497249
+  best_epoch        : 8.0
+  registered version: 1
+  artifacts         : ['classification_report.txt', 'confusion_matrix.png', 'metrics.json', 'model.pt', 'params.yaml', 'split_summary.json', 'training_curves.png']
+
+run 3594a3ace0f9427998c21a6468c8236e  'resnet18-finetune'  status=FINISHED
+  architecture      : resnet18_finetune
+  epochs / lr       : 4 / 0.005
+  params logged     : 48
+  trainable params  : 1026 of 11177538
+  test_accuracy     : 0.975
+  test_f1           : 0.975
+  best_epoch        : 4.0
+  registered version: 2
+  artifacts         : ['params.yaml', 'resnet18_finetune.pt', 'resnet18_finetune_classification_report.txt', 'resnet18_finetune_confusion_matrix.png', 'resnet18_finetune_metrics.json', 'resnet18_finetune_training_curves.png', 'split_summary.json']
+
+================================================================================================
+REGISTERED MODEL 'cats-vs-dogs-classifier'   aliases: {'challenger': 2, 'champion': 2}
+  v1: baseline_cnn | test_accuracy=0.7250 | run=d604ad0f8b8a4a72b29b45d8789bfd89
+  v2: resnet18_finetune | test_accuracy=0.9750 | run=3594a3ace0f9427998c21a6468c8236e
