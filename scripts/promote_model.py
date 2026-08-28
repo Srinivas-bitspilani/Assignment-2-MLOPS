@@ -37,17 +37,15 @@ from mlflow.tracking import MlflowClient
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.config import load_params  # noqa: E402
+# The gate itself lives in src/promotion.py, which imports no MLflow, so it can
+# be unit-tested in the serving environment where MLflow is not installed.
+from src.promotion import as_float, decide  # noqa: E402,F401
 from src.training.train import resolve_tracking_uri  # noqa: E402
 
 
 # --------------------------------------------------------------------------- #
 # helpers
 # --------------------------------------------------------------------------- #
-def as_float(value, default: float = -1.0) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
 
 
 def version_row(version, alias_map: dict[int, list[str]] | None = None) -> dict:
@@ -67,52 +65,6 @@ def version_row(version, alias_map: dict[int, list[str]] | None = None) -> dict:
         "aliases": sorted(aliases),
         "created": version.creation_timestamp,
     }
-
-
-def decide(candidate: dict | None, champion: dict | None, min_delta: float):
-    """The promotion gate, isolated so it can be unit-tested.
-
-    Returns (promote: bool, reason: str).
-
-    Rules:
-      * no candidate            -> nothing to do
-      * no champion yet         -> promote the candidate
-      * candidate beats champion by more than min_delta -> promote
-      * otherwise               -> reject (a normal outcome, not an error)
-    """
-    if candidate is None:
-        return False, "no candidate version available"
-
-    if champion is None:
-        return True, "no champion yet: promoting the best available version"
-
-    margin = candidate["test_accuracy"] - champion["test_accuracy"]
-    promote = margin > min_delta
-    reason = (
-        f"challenger v{candidate['version']} accuracy "
-        f"{candidate['test_accuracy']:.4f} vs champion "
-        f"v{champion['version']} {champion['test_accuracy']:.4f} "
-        f"(margin {margin:+.4f}, required > {min_delta})"
-    )
-    return promote, reason
-
-
-def alias_map(client: MlflowClient, name: str) -> dict[int, list[str]]:
-    """version number -> aliases pointing at it, read from the registered model."""
-    mapping: dict[int, list[str]] = {}
-    try:
-        model = client.get_registered_model(name)
-    except Exception:
-        return mapping
-    for alias in getattr(model, "aliases", None) or []:
-        # Depending on the MLflow version this is either a list of objects with
-        # .alias/.version or a plain {alias: version} dict.
-        if isinstance(alias, str):
-            number = int((model.aliases or {})[alias])
-            mapping.setdefault(number, []).append(alias)
-        else:
-            mapping.setdefault(int(alias.version), []).append(alias.alias)
-    return mapping
 
 
 def load_registry(client: MlflowClient, name: str) -> list[dict]:

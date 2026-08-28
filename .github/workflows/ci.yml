@@ -34,7 +34,9 @@ jobs:
     strategy:
       fail-fast: false            # report every version, not just the first failure
       matrix:
-        python-version: ["3.11", "3.12"]
+        # 3.12 is the floor: numpy==2.5.2 declares requires_python >= 3.12,
+        # so 3.11 cannot satisfy the pinned dependency set.
+        python-version: ["3.12", "3.13"]
 
     steps:
       - name: Check out repository

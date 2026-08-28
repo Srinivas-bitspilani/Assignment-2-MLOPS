@@ -2,8 +2,8 @@
 
 These cover the two pieces that decide *which model reaches production*:
 
-  * src/models/factory.py    - rebuilds the right architecture from a checkpoint
-  * scripts/promote_model.py - the accuracy gate a challenger must pass
+  * src/models/factory.py - rebuilds the right architecture from a checkpoint
+  * src/promotion.py      - the accuracy gate a challenger must pass
 
 A bug in either would ship the wrong model, which no amount of API testing
 would catch.
@@ -20,7 +20,9 @@ import torch
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.promote_model import as_float, decide  # noqa: E402
+# Imported from src/promotion.py, not scripts/promote_model.py: the gate must
+# be testable without MLflow installed (CI installs serving deps only).
+from src.promotion import as_float, decide  # noqa: E402
 from src.models.cnn import BaselineCNN  # noqa: E402
 from src.models.factory import (  # noqa: E402
     BASELINE,
