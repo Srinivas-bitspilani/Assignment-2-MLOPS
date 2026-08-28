@@ -8,8 +8,6 @@ env/
 
 # ---- Data (versioned by DVC, not Git) ----
 # DVC writes its own /data/.gitignore entries for anything added with `dvc add`.
-/data/processed/*
-!/data/processed/.gitkeep
 
 # ---- Model artifacts (versioned by DVC / MLflow) ----
 /artifacts/*
