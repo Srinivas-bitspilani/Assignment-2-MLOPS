@@ -14,6 +14,11 @@ data:
     val: 0.1
     test: 0.1
   seed: 42
+  # ImageNet statistics: the same values MUST be used at training time and at
+  # inference time in the API, otherwise the served model sees shifted inputs.
+  normalize:
+    mean: [0.485, 0.456, 0.406]
+    std:  [0.229, 0.224, 0.225]
 
 augmentation:
   horizontal_flip: true
