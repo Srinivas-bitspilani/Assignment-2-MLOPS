@@ -1,0 +1,24 @@
+# Service exposing the inference Deployment.
+#
+# NodePort is chosen because Minikube/Kind have no cloud load balancer: a
+# LoadBalancer service would sit in <pending> forever. With NodePort the API is
+# reachable at:
+#
+#     minikube service cats-dogs-api --url
+#     # or directly: http://$(minikube ip):30080
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cats-dogs-api
+  labels:
+    app: cats-dogs-api
+spec:
+  type: NodePort
+  selector:
+    app: cats-dogs-api      # must match the pod labels in deployment.yaml
+  ports:
+    - name: http
+      port: 80              # service port (inside the cluster)
+      targetPort: 8000      # container port
+      nodePort: 30080       # fixed so smoke tests have a stable URL

@@ -1,0 +1,140 @@
+name: CD
+
+# Continuous Deployment.
+#
+# Triggered automatically when the CI workflow finishes successfully on main,
+# so a commit flows: tests -> image published -> deployed -> smoke tested.
+# Can also be run manually against a chosen image tag.
+#
+# The cluster is a Minikube instance created inside the runner. That keeps the
+# whole pipeline self-contained and reproducible for grading, and it is the same
+# `kubectl apply` / `kubectl set image` / `kubectl rollout status` sequence you
+# would run against a real cluster.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to deploy (default: the current commit SHA)"
+        required: false
+        default: ""
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DEPLOYMENT: cats-dogs-api
+  SERVICE: cats-dogs-api
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes and smoke test
+    runs-on: ubuntu-latest
+    # Never deploy a red build.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Resolve the image reference
+        id: image
+        run: |
+          set -e
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          elif [ -n "${{ github.event.workflow_run.head_sha }}" ]; then
+            TAG="sha-${{ github.event.workflow_run.head_sha }}"
+          else
+            TAG="sha-${{ github.sha }}"
+          fi
+          # GHCR requires an all-lowercase repository path.
+          REPO=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "reference=${REPO}:${TAG}" >> $GITHUB_OUTPUT
+          echo "Deploying image: ${REPO}:${TAG}"
+
+      - name: Start Minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          driver: docker
+          cpus: 2
+          memory: 4096m
+
+      - name: Show cluster info
+        run: |
+          kubectl cluster-info
+          kubectl get nodes -o wide
+
+      - name: Log in to GHCR and create a pull secret
+        # Needed because a freshly published GHCR package is private by default.
+        run: |
+          kubectl create secret docker-registry ghcr-credentials \
+            --docker-server=${{ env.REGISTRY }} \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply the Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          # Attach the pull secret to the pod spec.
+          kubectl patch deployment ${{ env.DEPLOYMENT }} \
+            --type=strategic \
+            -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr-credentials"}]}}}}'
+
+      - name: Update the image (this is the actual deployment step)
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT }} \
+            api=${{ steps.image.outputs.reference }} \
+            --record=false
+          kubectl annotate deployment/${{ env.DEPLOYMENT }} \
+            kubernetes.io/change-cause="CD run ${{ github.run_number }}: ${{ steps.image.outputs.reference }}" \
+            --overwrite
+
+      - name: Wait for the rollout to finish
+        run: |
+          # Fails the job if the new pods never become ready.
+          kubectl rollout status deployment/${{ env.DEPLOYMENT }} --timeout=300s
+
+      - name: Show what is running
+        run: |
+          kubectl get deployment,pods,svc -o wide
+          kubectl describe deployment ${{ env.DEPLOYMENT }} | sed -n '1,40p'
+
+      - name: Install smoke-test dependencies
+        run: python -m pip install --quiet requests pillow
+
+      - name: Run smoke tests
+        # THE GATE: a non-zero exit here fails the whole CD pipeline, so a
+        # deployment that does not actually serve predictions is never accepted.
+        run: |
+          set -e
+          URL=$(minikube service ${{ env.SERVICE }} --url | head -1)
+          echo "Service URL: $URL"
+          python scripts/smoke_test.py --base-url "$URL" --retries 30 --delay 2
+
+      - name: Roll back if the smoke tests failed
+        if: failure()
+        run: |
+          echo "::error::Smoke tests failed - rolling back to the previous revision"
+          kubectl rollout undo deployment/${{ env.DEPLOYMENT }} || true
+          kubectl get pods
+          echo "--- pod logs ---"
+          kubectl logs -l app=${{ env.DEPLOYMENT }} --tail=100 --all-containers || true
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "### Deployment successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ steps.image.outputs.reference }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Replicas: $(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.status.readyReplicas}')/$(kubectl get deployment ${{ env.DEPLOYMENT }} -o jsonpath='{.spec.replicas}') ready" >> $GITHUB_STEP_SUMMARY
+          echo "- Smoke tests: passed" >> $GITHUB_STEP_SUMMARY

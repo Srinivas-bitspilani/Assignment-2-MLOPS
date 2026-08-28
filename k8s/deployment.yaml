@@ -1,0 +1,83 @@
+# Kubernetes Deployment for the Cats vs Dogs inference API.
+#
+# The `image` below is a placeholder. The CD pipeline replaces it with the
+# exact SHA-tagged image that CI just published:
+#
+#     kubectl set image deployment/cats-dogs-api \
+#       api=ghcr.io/<owner>/<repo>:sha-<commit>
+#
+# Using an immutable SHA tag rather than :latest is what makes a deployment
+# reproducible and a rollback meaningful.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cats-dogs-api
+  labels:
+    app: cats-dogs-api
+    component: inference
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cats-dogs-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0      # never drop below full capacity during an update
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: cats-dogs-api
+        component: inference
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/OWNER/REPO:latest
+          # IfNotPresent lets `minikube image load` work for local demos while
+          # still pulling SHA-tagged images that are not yet on the node.
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: MODEL_PATH
+              value: /app/artifacts/model.pt
+            - name: TORCH_NUM_THREADS
+              # One thread per replica: more would oversubscribe the CPU limit
+              # and make latency worse, not better.
+              value: "1"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi     # PyTorch + a 224x224 batch needs headroom
+          # Readiness gates traffic: a pod that has not finished loading the
+          # model is kept out of the Service until /health returns 200.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+          # Liveness restarts a pod that has wedged.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 10001
+      # Uncomment when the GHCR package is private:
+      # imagePullSecrets:
+      #   - name: ghcr-credentials
