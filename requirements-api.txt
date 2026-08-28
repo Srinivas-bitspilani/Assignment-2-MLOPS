@@ -1,0 +1,23 @@
+# Runtime dependencies for the FastAPI inference container ONLY.
+#
+# Deliberately excludes mlflow, dvc, scikit-learn and matplotlib: those are
+# training-time tools and pulling them into the serving image would add
+# hundreds of MB for no benefit. Full dev/training deps live in requirements.txt.
+#
+# torch/torchvision are installed from the PyTorch CPU wheel index in the
+# Dockerfile, which keeps the image ~2 GB smaller than the default CUDA build.
+
+# ---- web framework ----
+fastapi==0.141.1
+uvicorn==0.52.4
+python-multipart==0.0.32
+pydantic==2.13.4
+
+# ---- model runtime ----
+torch==2.13.0
+torchvision==0.28.0
+numpy==2.5.2
+pillow==12.3.0
+
+# ---- config loading (src/config.py) ----
+PyYAML==6.0.3

@@ -1,0 +1,42 @@
+# Datasets: 276 MB of images must never enter the image (DVC owns them).
+data/
+!data/.gitkeep
+
+# Experiment-tracking stores
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Git / DVC internals
+.git/
+.gitignore
+.dvc/
+.dvcignore
+*.dvc
+
+# CI / k8s manifests are not needed at runtime
+.github/
+k8s/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Training-only source (the container only serves)
+src/data/
+src/training/
+tests/
+
+# Large sample artifacts: keep model.pt, drop the rest
+artifacts/sample_augmented_batch.png
+artifacts/training_curves.png
+artifacts/confusion_matrix.png
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

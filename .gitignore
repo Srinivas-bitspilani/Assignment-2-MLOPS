@@ -9,9 +9,17 @@ env/
 # ---- Data (versioned by DVC, not Git) ----
 # DVC writes its own /data/.gitignore entries for anything added with `dvc add`.
 
-# ---- Model artifacts (versioned by DVC / MLflow) ----
+# ---- Model artifacts ----
+# The serving artifact and the small evaluation outputs ARE committed: the
+# Docker image built in CI needs model.pt, and there is no cloud DVC remote to
+# pull it from. It is only ~1.6 MB. Large sample images stay out.
 /artifacts/*
 !/artifacts/.gitkeep
+!/artifacts/model.pt
+!/artifacts/metrics.json
+!/artifacts/training_curves.png
+!/artifacts/confusion_matrix.png
+!/artifacts/classification_report.txt
 
 # ---- MLflow local tracking store ----
 mlruns/
