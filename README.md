@@ -29,6 +29,29 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
 | Kubernetes | Minikube 1.38.1 / k8s v1.35.1 | **2/2 replicas ready**, rolling update, smoke tests pass |
 | Post-deploy eval | 400 HTTP requests to the cluster | 400/400 answered, 72.50 % accuracy |
 
+**Verified in GitHub Actions** (commit `b61e9a3`):
+
+| Workflow | Job | Result | Time |
+|---|---|---|---|
+| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Pytest (preprocessing + inference) | ✅ **success** — 57 tests | 0.9 min |
+| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Build & publish image | ✅ **success** — built, smoke-tested, pushed to GHCR | 2.1 min |
+| [CD #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33176095013) | Deploy to Kubernetes and smoke test | ✅ **success** — rollout complete, smoke tests passed | 2.6 min |
+
+CD was triggered **automatically** by CI success, and the *"Roll back if the smoke
+tests failed"* step shows as `skipped` — the failure path is wired up and simply
+was not needed.
+
+**Published image:** `ghcr.io/srinivas-bitspilani/assignment-2-mlops`
+
+```bash
+docker pull ghcr.io/srinivas-bitspilani/assignment-2-mlops:latest
+docker run --rm -p 8000:8000 ghcr.io/srinivas-bitspilani/assignment-2-mlops:latest
+```
+
+Tags: `latest`, `main`, `sha-b61e9a37c34acf19f6a75a7b55c8181ae27de62f`
+(digest `sha256:8d4dc4e2a814…`). The SHA tag is what CD deploys, so any
+deployment is traceable to an exact commit.
+
 ---
 
 ## 1. Results
