@@ -23,7 +23,59 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
 ## 1. Results
 
 <!-- RESULTS_START -->
-_Populated by the training run — see `artifacts/metrics.json` for the raw values._
+**Run `d604ad0f8b8a4a72b29b45d8789bfd89`** — baseline CNN, 389,410 parameters,
+trained from scratch on CPU, 10 epochs, best weights restored from **epoch 8**.
+
+| Metric (held-out test split, 400 images) | Value |
+|---|---|
+| Accuracy | **72.50 %** |
+| Precision (macro) | 72.51 % |
+| Recall (macro) | 72.50 % |
+| F1 (macro) | 72.50 % |
+| Test loss | 0.5633 |
+| Best epoch | 8 (`val_loss` 0.5159, `val_accuracy` 0.7425) |
+| Peak validation accuracy | 77.25 % (epoch 7) |
+
+**Confusion matrix (test set)**
+
+| | predicted cat | predicted dog | recall |
+|---|---|---|---|
+| **true cat** | 143 | 57 | 71.5 % |
+| **true dog** | 53 | 147 | 73.5 % |
+
+Errors are almost perfectly balanced (57 vs 53), so the model is not biased
+toward either class — what you would want from a 50/50 stratified split.
+
+**Per-epoch validation accuracy**
+
+| epoch | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| val acc | .530 | .670 | .708 | .665 | .678 | .765 | **.773** | .743 | .728 | .618 |
+
+Validation loss bottoms out at epoch 8 and then climbs sharply (0.5159 → 0.6591)
+as the model starts to overfit — visible in `artifacts/training_curves.png`.
+This is exactly why the script restores the **best** weights rather than the
+last ones; using epoch 10 would have cost about 10 points of accuracy.
+
+**Train/serve consistency check.** Evaluating the *deployed* service over HTTP
+with `scripts/evaluate_deployed_model.py -n 200` reproduces the training-time
+confusion matrix **exactly** — `[[143, 57], [53, 147]]`, 72.50 % — which proves
+there is no preprocessing drift between training and serving:
+
+| | cat→cat | cat→dog | dog→cat | dog→dog | accuracy |
+|---|---|---|---|---|---|
+| Training (in-process) | 143 | 57 | 53 | 147 | 72.50 % |
+| Deployed (over HTTP) | 143 | 57 | 53 | 147 | 72.50 % |
+
+**Serving latency** (single CPU thread, measured client-side over 400 requests):
+mean 141 ms, p50 144 ms, p95 186 ms, max 201 ms; server-side inference alone
+averages 120 ms.
+
+**Is 72.5 % good?** For a 4-conv-block CNN trained from scratch on 3,200 images,
+yes — random is 50 %. The limit here is data volume and model capacity, not the
+pipeline. Fine-tuning a pretrained ResNet18 would reach ~97 % on the same data,
+but the assignment asks for a *baseline* CNN, and a baseline is what makes later
+improvements measurable.
 <!-- RESULTS_END -->
 
 Artifacts produced by a training run:

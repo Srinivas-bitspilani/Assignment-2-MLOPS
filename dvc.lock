@@ -34,3 +34,88 @@ stages:
       md5: 47da17fb629c6fd802cbe98d91568d5d.dir
       size: 80410730
       nfiles: 4001
+  train:
+    cmd: python train.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 47da17fb629c6fd802cbe98d91568d5d.dir
+      size: 80410730
+      nfiles: 4001
+    - path: src/config.py
+      hash: md5
+      md5: a16c150b9979f4a3f386c3724be6577c
+      size: 1017
+    - path: src/data/dataset.py
+      hash: md5
+      md5: 9a62e6f516cfe26d65e5d8aaaf094d0c
+      size: 5573
+    - path: src/models/cnn.py
+      hash: md5
+      md5: 0ff7baea37c1b22521c2509896e90c60
+      size: 5155
+    - path: src/training/train.py
+      hash: md5
+      md5: 954c4a20d9dd3129aa41ad047a033eaf
+      size: 15633
+    - path: train.py
+      hash: md5
+      md5: b2f087552027045bdbd7ee35e5798c07
+      size: 256
+    params:
+      params.yaml:
+        augmentation:
+          horizontal_flip: true
+          rotation_degrees: 15
+          color_jitter: 0.2
+          random_resized_crop_scale:
+          - 0.8
+          - 1.0
+        data.normalize:
+          mean:
+          - 0.485
+          - 0.456
+          - 0.406
+          std:
+          - 0.229
+          - 0.224
+          - 0.225
+        mlflow:
+          tracking_uri: sqlite:///mlflow.db
+          artifact_location: mlartifacts
+          experiment_name: cats-vs-dogs
+          run_name: baseline-cnn
+        model:
+          name: baseline_cnn
+          conv_blocks: 4
+          base_filters: 32
+          dropout: 0.5
+          num_classes: 2
+          artifact_dir: artifacts
+          artifact_name: model.pt
+        train:
+          epochs: 10
+          batch_size: 32
+          learning_rate: 0.001
+          optimizer: adam
+          weight_decay: 0.0001
+          num_workers: 0
+          seed: 42
+          early_stopping_patience: 3
+    outs:
+    - path: artifacts/confusion_matrix.png
+      hash: md5
+      md5: da251008d7e609919f554a6c90733f4d
+      size: 19746
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: 22328eba2ddd5d7cbbd4e17f3362dcc5
+      size: 1396
+    - path: artifacts/model.pt
+      hash: md5
+      md5: 3fdb06ffd7f1ebfdbe3f084cee06d8c0
+      size: 1569813
+    - path: artifacts/training_curves.png
+      hash: md5
+      md5: 5b83b22ff68abb6ee2d630033492e53f
+      size: 65972

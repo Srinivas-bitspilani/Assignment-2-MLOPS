@@ -20,6 +20,7 @@ env/
 !/artifacts/training_curves.png
 !/artifacts/confusion_matrix.png
 !/artifacts/classification_report.txt
+!/artifacts/deployment_evaluation.json
 
 # ---- MLflow local tracking store ----
 mlruns/

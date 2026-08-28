@@ -1,0 +1,2898 @@
+{
+  "base_url": "http://127.0.0.1:8200",
+  "mode": "real",
+  "evaluated_at_utc": "2026-08-28T11:59:12Z",
+  "deployed_model": {
+    "mlflow_run_id": "d604ad0f8b8a4a72b29b45d8789bfd89",
+    "training_test_accuracy": 0.725,
+    "classes": [
+      "cat",
+      "dog"
+    ]
+  },
+  "requests": {
+    "sent": 400,
+    "answered": 400,
+    "failed": 0
+  },
+  "accuracy": 0.725,
+  "accuracy_is_meaningful": true,
+  "confusion_matrix": {
+    "cat": {
+      "cat": 143,
+      "dog": 57
+    },
+    "dog": {
+      "cat": 53,
+      "dog": 147
+    }
+  },
+  "per_class": {
+    "cat": {
+      "support": 200,
+      "correct": 143,
+      "recall": 0.715
+    },
+    "dog": {
+      "support": 200,
+      "correct": 147,
+      "recall": 0.735
+    }
+  },
+  "latency_ms": {
+    "mean": 141.4,
+    "p50": 143.84,
+    "p95": 185.98,
+    "max": 200.69,
+    "server_inference_mean": 120.33
+  },
+  "mean_confidence": 0.6886,
+  "service_metrics": {
+    "uptime_seconds": 137.0,
+    "requests": {
+      "total": 620,
+      "by_endpoint": {
+        "/health": 5,
+        "/predict": 614,
+        "/metrics": 1
+      },
+      "by_status_class": {
+        "2xx": 619,
+        "4xx": 1
+      },
+      "errors_total": 1,
+      "error_rate": 0.0016
+    },
+    "latency_ms": {
+      "count": 620,
+      "average": 128.69,
+      "min": 1.16,
+      "max": 210.48,
+      "p50": 134.56,
+      "p95": 164.26,
+      "p99": 173.63,
+      "window_size": 620
+    },
+    "predictions": {
+      "total": 613,
+      "by_label": {
+        "cat": 306,
+        "dog": 307
+      },
+      "mean_confidence": 0.692
+    },
+    "model": {
+      "model_path": "C:\\Users\\ADMIN\\OneDrive - aapmor.com\\Desktop\\MLOPSASSIGNMENT\\artifacts\\model.pt",
+      "model_loaded": true,
+      "classes": [
+        "cat",
+        "dog"
+      ],
+      "image_size": 224,
+      "mlflow_run_id": "d604ad0f8b8a4a72b29b45d8789bfd89",
+      "test_accuracy": 0.725
+    }
+  },
+  "records": [
+    {
+      "filename": "dog_00407.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5686,
+      "round_trip_ms": 150.68
+    },
+    {
+      "filename": "dog_00928.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6721,
+      "round_trip_ms": 162.22
+    },
+    {
+      "filename": "cat_00740.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7038,
+      "round_trip_ms": 142.15
+    },
+    {
+      "filename": "dog_01954.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9666,
+      "round_trip_ms": 129.15
+    },
+    {
+      "filename": "cat_00255.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6233,
+      "round_trip_ms": 166.32
+    },
+    {
+      "filename": "dog_01300.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5122,
+      "round_trip_ms": 166.82
+    },
+    {
+      "filename": "dog_00781.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6026,
+      "round_trip_ms": 172.32
+    },
+    {
+      "filename": "dog_01309.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8529,
+      "round_trip_ms": 153.3
+    },
+    {
+      "filename": "dog_01947.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.778,
+      "round_trip_ms": 183.37
+    },
+    {
+      "filename": "cat_01393.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6604,
+      "round_trip_ms": 163.87
+    },
+    {
+      "filename": "cat_00940.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5834,
+      "round_trip_ms": 135.17
+    },
+    {
+      "filename": "cat_01652.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.8021,
+      "round_trip_ms": 143.84
+    },
+    {
+      "filename": "cat_00449.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7243,
+      "round_trip_ms": 175.86
+    },
+    {
+      "filename": "cat_01983.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6502,
+      "round_trip_ms": 169.21
+    },
+    {
+      "filename": "dog_00788.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7481,
+      "round_trip_ms": 138.21
+    },
+    {
+      "filename": "cat_01149.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.704,
+      "round_trip_ms": 180.07
+    },
+    {
+      "filename": "dog_01827.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6637,
+      "round_trip_ms": 161.33
+    },
+    {
+      "filename": "cat_01010.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.679,
+      "round_trip_ms": 123.47
+    },
+    {
+      "filename": "dog_01811.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6282,
+      "round_trip_ms": 131.61
+    },
+    {
+      "filename": "cat_01429.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6186,
+      "round_trip_ms": 131.33
+    },
+    {
+      "filename": "dog_00646.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9361,
+      "round_trip_ms": 90.28
+    },
+    {
+      "filename": "cat_00781.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6904,
+      "round_trip_ms": 104.39
+    },
+    {
+      "filename": "dog_01402.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9889,
+      "round_trip_ms": 76.78
+    },
+    {
+      "filename": "dog_00644.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9789,
+      "round_trip_ms": 103.73
+    },
+    {
+      "filename": "cat_01309.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8188,
+      "round_trip_ms": 143.99
+    },
+    {
+      "filename": "dog_00538.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6355,
+      "round_trip_ms": 157.68
+    },
+    {
+      "filename": "dog_01354.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.508,
+      "round_trip_ms": 182.14
+    },
+    {
+      "filename": "dog_00206.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5944,
+      "round_trip_ms": 192.42
+    },
+    {
+      "filename": "cat_00191.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5739,
+      "round_trip_ms": 157.62
+    },
+    {
+      "filename": "dog_00451.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5567,
+      "round_trip_ms": 179.71
+    },
+    {
+      "filename": "cat_00541.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6597,
+      "round_trip_ms": 153.97
+    },
+    {
+      "filename": "dog_00130.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8331,
+      "round_trip_ms": 145.41
+    },
+    {
+      "filename": "cat_01409.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6735,
+      "round_trip_ms": 157.04
+    },
+    {
+      "filename": "cat_00435.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7257,
+      "round_trip_ms": 151.65
+    },
+    {
+      "filename": "dog_01898.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9219,
+      "round_trip_ms": 149.35
+    },
+    {
+      "filename": "dog_01683.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9703,
+      "round_trip_ms": 167.91
+    },
+    {
+      "filename": "cat_01494.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7344,
+      "round_trip_ms": 181.41
+    },
+    {
+      "filename": "cat_01811.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6673,
+      "round_trip_ms": 174.64
+    },
+    {
+      "filename": "dog_00592.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5357,
+      "round_trip_ms": 161.93
+    },
+    {
+      "filename": "cat_01992.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6064,
+      "round_trip_ms": 170.1
+    },
+    {
+      "filename": "cat_00501.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.609,
+      "round_trip_ms": 163.68
+    },
+    {
+      "filename": "dog_00704.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5943,
+      "round_trip_ms": 186.14
+    },
+    {
+      "filename": "dog_00919.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5569,
+      "round_trip_ms": 159.17
+    },
+    {
+      "filename": "dog_01825.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8808,
+      "round_trip_ms": 157.9
+    },
+    {
+      "filename": "dog_00696.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5852,
+      "round_trip_ms": 142.24
+    },
+    {
+      "filename": "cat_00224.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.8554,
+      "round_trip_ms": 163.41
+    },
+    {
+      "filename": "dog_01708.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7397,
+      "round_trip_ms": 157.89
+    },
+    {
+      "filename": "dog_00088.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9872,
+      "round_trip_ms": 165.96
+    },
+    {
+      "filename": "cat_00864.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7962,
+      "round_trip_ms": 160.77
+    },
+    {
+      "filename": "cat_00061.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7573,
+      "round_trip_ms": 163.71
+    },
+    {
+      "filename": "dog_01880.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5765,
+      "round_trip_ms": 156.24
+    },
+    {
+      "filename": "dog_01287.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5943,
+      "round_trip_ms": 151.72
+    },
+    {
+      "filename": "dog_01589.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8804,
+      "round_trip_ms": 175.46
+    },
+    {
+      "filename": "dog_00758.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6292,
+      "round_trip_ms": 177.68
+    },
+    {
+      "filename": "dog_00114.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9439,
+      "round_trip_ms": 181.53
+    },
+    {
+      "filename": "dog_01516.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7277,
+      "round_trip_ms": 193.28
+    },
+    {
+      "filename": "dog_00778.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7958,
+      "round_trip_ms": 156.82
+    },
+    {
+      "filename": "dog_00209.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5076,
+      "round_trip_ms": 195.56
+    },
+    {
+      "filename": "cat_00209.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8846,
+      "round_trip_ms": 147.53
+    },
+    {
+      "filename": "cat_01898.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6108,
+      "round_trip_ms": 176.99
+    },
+    {
+      "filename": "cat_00563.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5117,
+      "round_trip_ms": 173.76
+    },
+    {
+      "filename": "dog_00542.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6901,
+      "round_trip_ms": 198.94
+    },
+    {
+      "filename": "cat_00592.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.703,
+      "round_trip_ms": 155.54
+    },
+    {
+      "filename": "dog_01312.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6138,
+      "round_trip_ms": 188.88
+    },
+    {
+      "filename": "dog_01648.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6738,
+      "round_trip_ms": 176.17
+    },
+    {
+      "filename": "cat_00775.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5754,
+      "round_trip_ms": 200.69
+    },
+    {
+      "filename": "dog_00318.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.95,
+      "round_trip_ms": 175.46
+    },
+    {
+      "filename": "dog_00313.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5694,
+      "round_trip_ms": 166.27
+    },
+    {
+      "filename": "cat_00810.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5744,
+      "round_trip_ms": 185.64
+    },
+    {
+      "filename": "dog_01751.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5128,
+      "round_trip_ms": 182.86
+    },
+    {
+      "filename": "dog_01442.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.529,
+      "round_trip_ms": 180.2
+    },
+    {
+      "filename": "cat_01888.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5182,
+      "round_trip_ms": 167.73
+    },
+    {
+      "filename": "dog_00958.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.616,
+      "round_trip_ms": 182.89
+    },
+    {
+      "filename": "cat_01043.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5591,
+      "round_trip_ms": 184.81
+    },
+    {
+      "filename": "dog_01982.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6029,
+      "round_trip_ms": 166.79
+    },
+    {
+      "filename": "dog_00135.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5053,
+      "round_trip_ms": 168.15
+    },
+    {
+      "filename": "cat_01547.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6864,
+      "round_trip_ms": 168.74
+    },
+    {
+      "filename": "cat_00429.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5031,
+      "round_trip_ms": 155.54
+    },
+    {
+      "filename": "cat_00393.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5959,
+      "round_trip_ms": 167.77
+    },
+    {
+      "filename": "dog_01983.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5834,
+      "round_trip_ms": 157.6
+    },
+    {
+      "filename": "dog_00051.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5409,
+      "round_trip_ms": 156.68
+    },
+    {
+      "filename": "cat_01093.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6417,
+      "round_trip_ms": 163.12
+    },
+    {
+      "filename": "cat_01622.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6798,
+      "round_trip_ms": 152.81
+    },
+    {
+      "filename": "dog_01034.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6675,
+      "round_trip_ms": 163.3
+    },
+    {
+      "filename": "cat_01354.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5119,
+      "round_trip_ms": 90.48
+    },
+    {
+      "filename": "cat_01399.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.506,
+      "round_trip_ms": 107.04
+    },
+    {
+      "filename": "cat_01300.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6912,
+      "round_trip_ms": 138.44
+    },
+    {
+      "filename": "cat_00644.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5442,
+      "round_trip_ms": 104.78
+    },
+    {
+      "filename": "dog_01994.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9923,
+      "round_trip_ms": 96.68
+    },
+    {
+      "filename": "cat_00065.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7431,
+      "round_trip_ms": 83.87
+    },
+    {
+      "filename": "cat_01583.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5018,
+      "round_trip_ms": 89.77
+    },
+    {
+      "filename": "dog_01955.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9176,
+      "round_trip_ms": 106.55
+    },
+    {
+      "filename": "dog_01103.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9103,
+      "round_trip_ms": 109.08
+    },
+    {
+      "filename": "cat_01098.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7592,
+      "round_trip_ms": 115.0
+    },
+    {
+      "filename": "cat_01657.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6776,
+      "round_trip_ms": 110.17
+    },
+    {
+      "filename": "dog_01206.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9248,
+      "round_trip_ms": 165.41
+    },
+    {
+      "filename": "dog_01476.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5218,
+      "round_trip_ms": 140.01
+    },
+    {
+      "filename": "cat_01470.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6755,
+      "round_trip_ms": 179.65
+    },
+    {
+      "filename": "cat_00283.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6788,
+      "round_trip_ms": 137.42
+    },
+    {
+      "filename": "dog_00505.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7552,
+      "round_trip_ms": 130.93
+    },
+    {
+      "filename": "dog_01794.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9844,
+      "round_trip_ms": 175.71
+    },
+    {
+      "filename": "cat_01022.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.793,
+      "round_trip_ms": 119.6
+    },
+    {
+      "filename": "dog_00541.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6762,
+      "round_trip_ms": 120.77
+    },
+    {
+      "filename": "dog_01838.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5257,
+      "round_trip_ms": 154.17
+    },
+    {
+      "filename": "cat_00178.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7792,
+      "round_trip_ms": 141.18
+    },
+    {
+      "filename": "dog_00865.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7704,
+      "round_trip_ms": 163.1
+    },
+    {
+      "filename": "cat_00569.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6463,
+      "round_trip_ms": 168.78
+    },
+    {
+      "filename": "cat_00741.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.9427,
+      "round_trip_ms": 147.02
+    },
+    {
+      "filename": "cat_00350.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7936,
+      "round_trip_ms": 154.56
+    },
+    {
+      "filename": "dog_00292.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6433,
+      "round_trip_ms": 133.78
+    },
+    {
+      "filename": "cat_01310.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.9745,
+      "round_trip_ms": 147.5
+    },
+    {
+      "filename": "cat_00432.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.633,
+      "round_trip_ms": 140.55
+    },
+    {
+      "filename": "cat_01794.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5037,
+      "round_trip_ms": 137.75
+    },
+    {
+      "filename": "cat_01330.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8354,
+      "round_trip_ms": 141.29
+    },
+    {
+      "filename": "dog_01116.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7522,
+      "round_trip_ms": 147.65
+    },
+    {
+      "filename": "dog_01220.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.591,
+      "round_trip_ms": 127.5
+    },
+    {
+      "filename": "cat_01396.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8088,
+      "round_trip_ms": 146.95
+    },
+    {
+      "filename": "cat_00817.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.566,
+      "round_trip_ms": 143.01
+    },
+    {
+      "filename": "cat_01964.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5883,
+      "round_trip_ms": 180.35
+    },
+    {
+      "filename": "cat_00646.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5757,
+      "round_trip_ms": 151.9
+    },
+    {
+      "filename": "dog_00186.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5677,
+      "round_trip_ms": 143.22
+    },
+    {
+      "filename": "dog_00435.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8172,
+      "round_trip_ms": 149.45
+    },
+    {
+      "filename": "dog_00877.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5279,
+      "round_trip_ms": 164.05
+    },
+    {
+      "filename": "cat_01982.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5949,
+      "round_trip_ms": 127.37
+    },
+    {
+      "filename": "cat_00161.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6017,
+      "round_trip_ms": 132.2
+    },
+    {
+      "filename": "dog_01437.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8969,
+      "round_trip_ms": 125.36
+    },
+    {
+      "filename": "cat_01247.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5439,
+      "round_trip_ms": 169.35
+    },
+    {
+      "filename": "cat_00142.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7088,
+      "round_trip_ms": 146.92
+    },
+    {
+      "filename": "dog_01342.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.561,
+      "round_trip_ms": 154.4
+    },
+    {
+      "filename": "cat_00130.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6154,
+      "round_trip_ms": 144.14
+    },
+    {
+      "filename": "cat_01838.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.748,
+      "round_trip_ms": 137.46
+    },
+    {
+      "filename": "dog_01409.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8002,
+      "round_trip_ms": 148.43
+    },
+    {
+      "filename": "dog_00775.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5913,
+      "round_trip_ms": 120.93
+    },
+    {
+      "filename": "cat_00051.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.631,
+      "round_trip_ms": 123.45
+    },
+    {
+      "filename": "dog_01986.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6441,
+      "round_trip_ms": 146.48
+    },
+    {
+      "filename": "cat_01266.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6884,
+      "round_trip_ms": 132.76
+    },
+    {
+      "filename": "cat_01974.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7944,
+      "round_trip_ms": 148.65
+    },
+    {
+      "filename": "cat_01954.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7229,
+      "round_trip_ms": 135.58
+    },
+    {
+      "filename": "dog_01285.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5205,
+      "round_trip_ms": 149.73
+    },
+    {
+      "filename": "dog_00939.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8106,
+      "round_trip_ms": 136.59
+    },
+    {
+      "filename": "cat_00747.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6282,
+      "round_trip_ms": 143.36
+    },
+    {
+      "filename": "cat_01813.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5113,
+      "round_trip_ms": 144.82
+    },
+    {
+      "filename": "dog_01327.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5904,
+      "round_trip_ms": 129.6
+    },
+    {
+      "filename": "dog_00429.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8088,
+      "round_trip_ms": 129.99
+    },
+    {
+      "filename": "dog_00546.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8595,
+      "round_trip_ms": 129.12
+    },
+    {
+      "filename": "dog_01182.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6466,
+      "round_trip_ms": 177.21
+    },
+    {
+      "filename": "dog_01698.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6283,
+      "round_trip_ms": 152.83
+    },
+    {
+      "filename": "cat_00114.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8307,
+      "round_trip_ms": 131.67
+    },
+    {
+      "filename": "dog_00163.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7266,
+      "round_trip_ms": 131.86
+    },
+    {
+      "filename": "dog_00501.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6769,
+      "round_trip_ms": 179.26
+    },
+    {
+      "filename": "cat_01285.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8148,
+      "round_trip_ms": 160.39
+    },
+    {
+      "filename": "cat_00318.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5229,
+      "round_trip_ms": 159.1
+    },
+    {
+      "filename": "cat_00505.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8835,
+      "round_trip_ms": 131.87
+    },
+    {
+      "filename": "dog_01133.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8093,
+      "round_trip_ms": 155.22
+    },
+    {
+      "filename": "dog_01493.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8485,
+      "round_trip_ms": 171.03
+    },
+    {
+      "filename": "cat_01683.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5132,
+      "round_trip_ms": 138.08
+    },
+    {
+      "filename": "dog_00326.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6204,
+      "round_trip_ms": 154.41
+    },
+    {
+      "filename": "cat_00206.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5444,
+      "round_trip_ms": 171.22
+    },
+    {
+      "filename": "dog_01525.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5724,
+      "round_trip_ms": 118.08
+    },
+    {
+      "filename": "cat_01437.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7699,
+      "round_trip_ms": 171.94
+    },
+    {
+      "filename": "cat_01083.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6268,
+      "round_trip_ms": 171.18
+    },
+    {
+      "filename": "dog_01563.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7888,
+      "round_trip_ms": 155.53
+    },
+    {
+      "filename": "cat_00451.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7264,
+      "round_trip_ms": 117.89
+    },
+    {
+      "filename": "cat_00447.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7529,
+      "round_trip_ms": 170.8
+    },
+    {
+      "filename": "cat_01751.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7462,
+      "round_trip_ms": 162.09
+    },
+    {
+      "filename": "dog_00285.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6891,
+      "round_trip_ms": 140.09
+    },
+    {
+      "filename": "dog_01396.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7442,
+      "round_trip_ms": 109.36
+    },
+    {
+      "filename": "dog_00552.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6988,
+      "round_trip_ms": 189.56
+    },
+    {
+      "filename": "dog_00393.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6384,
+      "round_trip_ms": 161.14
+    },
+    {
+      "filename": "dog_00735.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9573,
+      "round_trip_ms": 163.21
+    },
+    {
+      "filename": "cat_01493.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7565,
+      "round_trip_ms": 150.61
+    },
+    {
+      "filename": "cat_00285.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5616,
+      "round_trip_ms": 165.75
+    },
+    {
+      "filename": "cat_00327.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7855,
+      "round_trip_ms": 139.61
+    },
+    {
+      "filename": "cat_01780.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5398,
+      "round_trip_ms": 167.2
+    },
+    {
+      "filename": "dog_00664.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7764,
+      "round_trip_ms": 131.14
+    },
+    {
+      "filename": "cat_00859.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5715,
+      "round_trip_ms": 158.4
+    },
+    {
+      "filename": "dog_01537.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6736,
+      "round_trip_ms": 136.56
+    },
+    {
+      "filename": "cat_00333.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6277,
+      "round_trip_ms": 160.66
+    },
+    {
+      "filename": "dog_00817.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8969,
+      "round_trip_ms": 143.74
+    },
+    {
+      "filename": "cat_00407.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6601,
+      "round_trip_ms": 117.21
+    },
+    {
+      "filename": "dog_00600.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9144,
+      "round_trip_ms": 79.42
+    },
+    {
+      "filename": "cat_01650.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6244,
+      "round_trip_ms": 135.89
+    },
+    {
+      "filename": "dog_01990.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7081,
+      "round_trip_ms": 140.59
+    },
+    {
+      "filename": "cat_01476.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5835,
+      "round_trip_ms": 118.51
+    },
+    {
+      "filename": "cat_01698.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6394,
+      "round_trip_ms": 135.02
+    },
+    {
+      "filename": "dog_00224.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.524,
+      "round_trip_ms": 148.31
+    },
+    {
+      "filename": "dog_01010.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8821,
+      "round_trip_ms": 136.27
+    },
+    {
+      "filename": "cat_01402.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5201,
+      "round_trip_ms": 87.11
+    },
+    {
+      "filename": "dog_01974.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.507,
+      "round_trip_ms": 138.13
+    },
+    {
+      "filename": "cat_01735.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6387,
+      "round_trip_ms": 141.12
+    },
+    {
+      "filename": "dog_01399.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5995,
+      "round_trip_ms": 67.51
+    },
+    {
+      "filename": "cat_00552.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.575,
+      "round_trip_ms": 105.88
+    },
+    {
+      "filename": "dog_00013.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7587,
+      "round_trip_ms": 134.2
+    },
+    {
+      "filename": "cat_00928.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5414,
+      "round_trip_ms": 140.25
+    },
+    {
+      "filename": "cat_00096.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.586,
+      "round_trip_ms": 110.96
+    },
+    {
+      "filename": "dog_01518.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8059,
+      "round_trip_ms": 143.01
+    },
+    {
+      "filename": "dog_01209.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5027,
+      "round_trip_ms": 124.21
+    },
+    {
+      "filename": "cat_00548.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6236,
+      "round_trip_ms": 139.82
+    },
+    {
+      "filename": "dog_01813.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7987,
+      "round_trip_ms": 133.68
+    },
+    {
+      "filename": "cat_00135.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7241,
+      "round_trip_ms": 120.14
+    },
+    {
+      "filename": "cat_00476.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6349,
+      "round_trip_ms": 170.18
+    },
+    {
+      "filename": "dog_00514.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7112,
+      "round_trip_ms": 136.45
+    },
+    {
+      "filename": "dog_01247.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6801,
+      "round_trip_ms": 193.56
+    },
+    {
+      "filename": "dog_00146.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5015,
+      "round_trip_ms": 163.14
+    },
+    {
+      "filename": "cat_01529.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5902,
+      "round_trip_ms": 173.47
+    },
+    {
+      "filename": "dog_00466.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6088,
+      "round_trip_ms": 144.11
+    },
+    {
+      "filename": "cat_01287.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5535,
+      "round_trip_ms": 118.9
+    },
+    {
+      "filename": "dog_00747.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5803,
+      "round_trip_ms": 162.64
+    },
+    {
+      "filename": "dog_00142.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.528,
+      "round_trip_ms": 148.55
+    },
+    {
+      "filename": "dog_00191.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7018,
+      "round_trip_ms": 132.22
+    },
+    {
+      "filename": "cat_01312.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5017,
+      "round_trip_ms": 166.58
+    },
+    {
+      "filename": "cat_00946.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6932,
+      "round_trip_ms": 160.13
+    },
+    {
+      "filename": "dog_01888.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8052,
+      "round_trip_ms": 125.33
+    },
+    {
+      "filename": "dog_00940.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8909,
+      "round_trip_ms": 114.05
+    },
+    {
+      "filename": "cat_00514.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6078,
+      "round_trip_ms": 146.54
+    },
+    {
+      "filename": "cat_01589.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5951,
+      "round_trip_ms": 133.6
+    },
+    {
+      "filename": "cat_01994.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.844,
+      "round_trip_ms": 125.74
+    },
+    {
+      "filename": "cat_01648.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5658,
+      "round_trip_ms": 136.89
+    },
+    {
+      "filename": "cat_01182.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5121,
+      "round_trip_ms": 160.7
+    },
+    {
+      "filename": "dog_01573.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7639,
+      "round_trip_ms": 168.53
+    },
+    {
+      "filename": "dog_01992.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8783,
+      "round_trip_ms": 164.75
+    },
+    {
+      "filename": "dog_01735.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7399,
+      "round_trip_ms": 139.6
+    },
+    {
+      "filename": "dog_01574.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8591,
+      "round_trip_ms": 139.43
+    },
+    {
+      "filename": "dog_01266.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.868,
+      "round_trip_ms": 197.22
+    },
+    {
+      "filename": "dog_01554.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5981,
+      "round_trip_ms": 117.94
+    },
+    {
+      "filename": "dog_00821.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5098,
+      "round_trip_ms": 109.14
+    },
+    {
+      "filename": "dog_00334.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6408,
+      "round_trip_ms": 158.84
+    },
+    {
+      "filename": "cat_00919.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7511,
+      "round_trip_ms": 145.22
+    },
+    {
+      "filename": "dog_00689.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.911,
+      "round_trip_ms": 161.47
+    },
+    {
+      "filename": "cat_01537.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5853,
+      "round_trip_ms": 117.44
+    },
+    {
+      "filename": "dog_00178.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9614,
+      "round_trip_ms": 189.15
+    },
+    {
+      "filename": "cat_01206.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8053,
+      "round_trip_ms": 128.47
+    },
+    {
+      "filename": "cat_00198.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.684,
+      "round_trip_ms": 192.52
+    },
+    {
+      "filename": "cat_01825.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.8723,
+      "round_trip_ms": 176.47
+    },
+    {
+      "filename": "dog_00255.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6758,
+      "round_trip_ms": 126.85
+    },
+    {
+      "filename": "cat_01342.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5777,
+      "round_trip_ms": 124.51
+    },
+    {
+      "filename": "dog_01236.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5636,
+      "round_trip_ms": 82.39
+    },
+    {
+      "filename": "dog_00189.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8334,
+      "round_trip_ms": 136.05
+    },
+    {
+      "filename": "cat_01955.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5023,
+      "round_trip_ms": 143.89
+    },
+    {
+      "filename": "dog_01650.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7601,
+      "round_trip_ms": 100.64
+    },
+    {
+      "filename": "dog_01622.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7976,
+      "round_trip_ms": 124.48
+    },
+    {
+      "filename": "dog_00228.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6881,
+      "round_trip_ms": 153.42
+    },
+    {
+      "filename": "cat_01554.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.86,
+      "round_trip_ms": 151.44
+    },
+    {
+      "filename": "cat_01726.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6529,
+      "round_trip_ms": 188.68
+    },
+    {
+      "filename": "cat_00146.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5551,
+      "round_trip_ms": 135.3
+    },
+    {
+      "filename": "cat_01986.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6674,
+      "round_trip_ms": 137.02
+    },
+    {
+      "filename": "cat_01130.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6165,
+      "round_trip_ms": 145.18
+    },
+    {
+      "filename": "dog_00023.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6754,
+      "round_trip_ms": 135.18
+    },
+    {
+      "filename": "dog_01436.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7131,
+      "round_trip_ms": 136.28
+    },
+    {
+      "filename": "dog_00469.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8047,
+      "round_trip_ms": 124.28
+    },
+    {
+      "filename": "cat_01140.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7234,
+      "round_trip_ms": 131.06
+    },
+    {
+      "filename": "cat_01099.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7006,
+      "round_trip_ms": 120.95
+    },
+    {
+      "filename": "cat_00334.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7131,
+      "round_trip_ms": 127.77
+    },
+    {
+      "filename": "dog_01964.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7595,
+      "round_trip_ms": 132.74
+    },
+    {
+      "filename": "dog_01466.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7701,
+      "round_trip_ms": 142.93
+    },
+    {
+      "filename": "dog_01774.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6354,
+      "round_trip_ms": 132.69
+    },
+    {
+      "filename": "cat_00546.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5809,
+      "round_trip_ms": 158.95
+    },
+    {
+      "filename": "cat_00758.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7447,
+      "round_trip_ms": 171.64
+    },
+    {
+      "filename": "cat_01466.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6775,
+      "round_trip_ms": 143.14
+    },
+    {
+      "filename": "cat_00189.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5035,
+      "round_trip_ms": 164.35
+    },
+    {
+      "filename": "dog_00061.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5183,
+      "round_trip_ms": 180.43
+    },
+    {
+      "filename": "cat_01385.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.574,
+      "round_trip_ms": 151.67
+    },
+    {
+      "filename": "dog_00740.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7001,
+      "round_trip_ms": 169.81
+    },
+    {
+      "filename": "dog_00601.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6349,
+      "round_trip_ms": 187.09
+    },
+    {
+      "filename": "dog_00563.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6459,
+      "round_trip_ms": 136.68
+    },
+    {
+      "filename": "cat_00877.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5256,
+      "round_trip_ms": 138.57
+    },
+    {
+      "filename": "dog_01508.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.8571,
+      "round_trip_ms": 140.86
+    },
+    {
+      "filename": "dog_01998.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9974,
+      "round_trip_ms": 115.53
+    },
+    {
+      "filename": "cat_01436.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5593,
+      "round_trip_ms": 158.99
+    },
+    {
+      "filename": "cat_00939.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5309,
+      "round_trip_ms": 166.65
+    },
+    {
+      "filename": "dog_01330.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7079,
+      "round_trip_ms": 146.34
+    },
+    {
+      "filename": "dog_01529.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5686,
+      "round_trip_ms": 123.84
+    },
+    {
+      "filename": "cat_00890.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5026,
+      "round_trip_ms": 120.12
+    },
+    {
+      "filename": "cat_01764.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.8765,
+      "round_trip_ms": 151.49
+    },
+    {
+      "filename": "cat_00600.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7262,
+      "round_trip_ms": 112.02
+    },
+    {
+      "filename": "dog_00054.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5923,
+      "round_trip_ms": 155.7
+    },
+    {
+      "filename": "dog_01197.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8662,
+      "round_trip_ms": 153.22
+    },
+    {
+      "filename": "dog_00859.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6126,
+      "round_trip_ms": 126.71
+    },
+    {
+      "filename": "cat_01232.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7908,
+      "round_trip_ms": 130.78
+    },
+    {
+      "filename": "dog_01652.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5028,
+      "round_trip_ms": 133.03
+    },
+    {
+      "filename": "cat_00023.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6229,
+      "round_trip_ms": 169.87
+    },
+    {
+      "filename": "dog_00741.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8112,
+      "round_trip_ms": 163.99
+    },
+    {
+      "filename": "cat_01827.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5582,
+      "round_trip_ms": 162.49
+    },
+    {
+      "filename": "dog_01043.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6496,
+      "round_trip_ms": 167.03
+    },
+    {
+      "filename": "cat_00689.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6552,
+      "round_trip_ms": 150.86
+    },
+    {
+      "filename": "cat_01774.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5047,
+      "round_trip_ms": 173.26
+    },
+    {
+      "filename": "dog_01195.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.575,
+      "round_trip_ms": 184.32
+    },
+    {
+      "filename": "dog_01762.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6832,
+      "round_trip_ms": 153.62
+    },
+    {
+      "filename": "dog_00727.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7352,
+      "round_trip_ms": 170.92
+    },
+    {
+      "filename": "dog_00096.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6439,
+      "round_trip_ms": 164.75
+    },
+    {
+      "filename": "dog_00569.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8929,
+      "round_trip_ms": 185.98
+    },
+    {
+      "filename": "cat_01763.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6805,
+      "round_trip_ms": 153.38
+    },
+    {
+      "filename": "dog_00198.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8608,
+      "round_trip_ms": 189.28
+    },
+    {
+      "filename": "dog_01780.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7762,
+      "round_trip_ms": 133.04
+    },
+    {
+      "filename": "cat_00664.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7797,
+      "round_trip_ms": 165.25
+    },
+    {
+      "filename": "dog_01393.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5878,
+      "round_trip_ms": 157.36
+    },
+    {
+      "filename": "dog_01099.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.535,
+      "round_trip_ms": 141.2
+    },
+    {
+      "filename": "cat_00958.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5011,
+      "round_trip_ms": 123.2
+    },
+    {
+      "filename": "cat_01880.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.573,
+      "round_trip_ms": 179.48
+    },
+    {
+      "filename": "dog_00946.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8561,
+      "round_trip_ms": 157.81
+    },
+    {
+      "filename": "cat_00088.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7564,
+      "round_trip_ms": 156.92
+    },
+    {
+      "filename": "dog_01022.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8366,
+      "round_trip_ms": 147.8
+    },
+    {
+      "filename": "dog_00440.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8063,
+      "round_trip_ms": 187.0
+    },
+    {
+      "filename": "dog_00777.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7809,
+      "round_trip_ms": 151.8
+    },
+    {
+      "filename": "cat_00865.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5009,
+      "round_trip_ms": 161.68
+    },
+    {
+      "filename": "cat_01442.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6168,
+      "round_trip_ms": 164.91
+    },
+    {
+      "filename": "dog_00161.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9814,
+      "round_trip_ms": 188.45
+    },
+    {
+      "filename": "dog_00093.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9002,
+      "round_trip_ms": 170.62
+    },
+    {
+      "filename": "dog_00283.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.537,
+      "round_trip_ms": 170.48
+    },
+    {
+      "filename": "dog_00476.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5663,
+      "round_trip_ms": 158.5
+    },
+    {
+      "filename": "cat_01563.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.754,
+      "round_trip_ms": 142.3
+    },
+    {
+      "filename": "dog_01583.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5547,
+      "round_trip_ms": 147.61
+    },
+    {
+      "filename": "dog_01130.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6994,
+      "round_trip_ms": 147.62
+    },
+    {
+      "filename": "cat_01221.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6229,
+      "round_trip_ms": 173.04
+    },
+    {
+      "filename": "cat_00788.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5438,
+      "round_trip_ms": 99.04
+    },
+    {
+      "filename": "cat_01573.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.9827,
+      "round_trip_ms": 75.42
+    },
+    {
+      "filename": "cat_01516.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8164,
+      "round_trip_ms": 107.31
+    },
+    {
+      "filename": "dog_00810.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5192,
+      "round_trip_ms": 91.37
+    },
+    {
+      "filename": "dog_01429.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6763,
+      "round_trip_ms": 146.12
+    },
+    {
+      "filename": "dog_00890.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7522,
+      "round_trip_ms": 157.96
+    },
+    {
+      "filename": "dog_00457.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5736,
+      "round_trip_ms": 195.26
+    },
+    {
+      "filename": "dog_01161.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6088,
+      "round_trip_ms": 158.59
+    },
+    {
+      "filename": "cat_00704.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7277,
+      "round_trip_ms": 144.67
+    },
+    {
+      "filename": "cat_00186.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6768,
+      "round_trip_ms": 193.3
+    },
+    {
+      "filename": "cat_00735.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5172,
+      "round_trip_ms": 161.16
+    },
+    {
+      "filename": "dog_01316.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.5654,
+      "round_trip_ms": 175.27
+    },
+    {
+      "filename": "cat_01197.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7433,
+      "round_trip_ms": 171.33
+    },
+    {
+      "filename": "dog_01149.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7584,
+      "round_trip_ms": 162.32
+    },
+    {
+      "filename": "cat_01708.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5203,
+      "round_trip_ms": 154.0
+    },
+    {
+      "filename": "cat_01508.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7609,
+      "round_trip_ms": 121.55
+    },
+    {
+      "filename": "cat_00228.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.8093,
+      "round_trip_ms": 91.88
+    },
+    {
+      "filename": "cat_01327.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7136,
+      "round_trip_ms": 140.92
+    },
+    {
+      "filename": "dog_00333.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.648,
+      "round_trip_ms": 147.03
+    },
+    {
+      "filename": "cat_00292.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6732,
+      "round_trip_ms": 138.54
+    },
+    {
+      "filename": "cat_00469.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5923,
+      "round_trip_ms": 101.23
+    },
+    {
+      "filename": "dog_00449.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8218,
+      "round_trip_ms": 100.19
+    },
+    {
+      "filename": "cat_00054.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5917,
+      "round_trip_ms": 121.18
+    },
+    {
+      "filename": "cat_00727.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7756,
+      "round_trip_ms": 90.79
+    },
+    {
+      "filename": "cat_00013.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6823,
+      "round_trip_ms": 83.24
+    },
+    {
+      "filename": "cat_01236.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5781,
+      "round_trip_ms": 77.27
+    },
+    {
+      "filename": "cat_00234.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5591,
+      "round_trip_ms": 100.11
+    },
+    {
+      "filename": "dog_00327.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6567,
+      "round_trip_ms": 122.59
+    },
+    {
+      "filename": "dog_00234.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6009,
+      "round_trip_ms": 131.43
+    },
+    {
+      "filename": "dog_01098.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5247,
+      "round_trip_ms": 107.35
+    },
+    {
+      "filename": "dog_01657.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8102,
+      "round_trip_ms": 121.36
+    },
+    {
+      "filename": "cat_00821.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6929,
+      "round_trip_ms": 80.86
+    },
+    {
+      "filename": "cat_01316.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5552,
+      "round_trip_ms": 107.86
+    },
+    {
+      "filename": "dog_01221.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.763,
+      "round_trip_ms": 196.11
+    },
+    {
+      "filename": "cat_00601.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6561,
+      "round_trip_ms": 99.6
+    },
+    {
+      "filename": "cat_01372.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6351,
+      "round_trip_ms": 87.32
+    },
+    {
+      "filename": "cat_00777.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6572,
+      "round_trip_ms": 118.33
+    },
+    {
+      "filename": "cat_01990.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6486,
+      "round_trip_ms": 94.96
+    },
+    {
+      "filename": "dog_01140.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5302,
+      "round_trip_ms": 95.96
+    },
+    {
+      "filename": "dog_01372.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7492,
+      "round_trip_ms": 99.12
+    },
+    {
+      "filename": "dog_01470.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9764,
+      "round_trip_ms": 88.42
+    },
+    {
+      "filename": "cat_00542.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7937,
+      "round_trip_ms": 109.18
+    },
+    {
+      "filename": "cat_01103.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.6489,
+      "round_trip_ms": 102.28
+    },
+    {
+      "filename": "dog_01726.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9758,
+      "round_trip_ms": 109.61
+    },
+    {
+      "filename": "cat_00696.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8727,
+      "round_trip_ms": 90.29
+    },
+    {
+      "filename": "dog_01764.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6757,
+      "round_trip_ms": 91.66
+    },
+    {
+      "filename": "cat_01301.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6385,
+      "round_trip_ms": 67.65
+    },
+    {
+      "filename": "cat_00093.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5303,
+      "round_trip_ms": 70.94
+    },
+    {
+      "filename": "cat_01574.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8814,
+      "round_trip_ms": 101.31
+    },
+    {
+      "filename": "cat_01518.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6773,
+      "round_trip_ms": 102.33
+    },
+    {
+      "filename": "cat_01034.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.9678,
+      "round_trip_ms": 100.55
+    },
+    {
+      "filename": "cat_00163.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5892,
+      "round_trip_ms": 91.3
+    },
+    {
+      "filename": "cat_00778.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7267,
+      "round_trip_ms": 102.38
+    },
+    {
+      "filename": "dog_01385.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7691,
+      "round_trip_ms": 99.68
+    },
+    {
+      "filename": "cat_00457.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7366,
+      "round_trip_ms": 118.31
+    },
+    {
+      "filename": "dog_00548.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.9364,
+      "round_trip_ms": 112.0
+    },
+    {
+      "filename": "dog_00350.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7432,
+      "round_trip_ms": 125.02
+    },
+    {
+      "filename": "cat_01762.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5255,
+      "round_trip_ms": 145.33
+    },
+    {
+      "filename": "cat_00313.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5352,
+      "round_trip_ms": 83.68
+    },
+    {
+      "filename": "dog_00864.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.807,
+      "round_trip_ms": 114.66
+    },
+    {
+      "filename": "cat_01116.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.8945,
+      "round_trip_ms": 130.42
+    },
+    {
+      "filename": "dog_01547.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.79,
+      "round_trip_ms": 82.74
+    },
+    {
+      "filename": "cat_00326.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7019,
+      "round_trip_ms": 90.38
+    },
+    {
+      "filename": "cat_01978.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7363,
+      "round_trip_ms": 90.84
+    },
+    {
+      "filename": "cat_01195.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7263,
+      "round_trip_ms": 100.68
+    },
+    {
+      "filename": "dog_01232.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7665,
+      "round_trip_ms": 89.96
+    },
+    {
+      "filename": "dog_01083.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.816,
+      "round_trip_ms": 109.91
+    },
+    {
+      "filename": "dog_01301.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.5665,
+      "round_trip_ms": 70.93
+    },
+    {
+      "filename": "dog_00432.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.8407,
+      "round_trip_ms": 117.96
+    },
+    {
+      "filename": "dog_01978.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.6094,
+      "round_trip_ms": 93.97
+    },
+    {
+      "filename": "dog_00065.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.6297,
+      "round_trip_ms": 105.12
+    },
+    {
+      "filename": "cat_01161.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7796,
+      "round_trip_ms": 98.7
+    },
+    {
+      "filename": "cat_01998.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7635,
+      "round_trip_ms": 88.37
+    },
+    {
+      "filename": "dog_01763.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7323,
+      "round_trip_ms": 97.37
+    },
+    {
+      "filename": "cat_01220.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6212,
+      "round_trip_ms": 112.73
+    },
+    {
+      "filename": "cat_01209.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5144,
+      "round_trip_ms": 117.1
+    },
+    {
+      "filename": "cat_01947.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.7507,
+      "round_trip_ms": 103.67
+    },
+    {
+      "filename": "cat_00440.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.6535,
+      "round_trip_ms": 117.97
+    },
+    {
+      "filename": "cat_01525.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.5347,
+      "round_trip_ms": 107.16
+    },
+    {
+      "filename": "dog_00447.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.683,
+      "round_trip_ms": 104.77
+    },
+    {
+      "filename": "dog_01494.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7884,
+      "round_trip_ms": 135.97
+    },
+    {
+      "filename": "cat_01133.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5306,
+      "round_trip_ms": 91.53
+    },
+    {
+      "filename": "cat_00466.jpg",
+      "true_label": "cat",
+      "predicted_label": "cat",
+      "confidence": 0.5103,
+      "round_trip_ms": 104.07
+    },
+    {
+      "filename": "cat_00538.jpg",
+      "true_label": "cat",
+      "predicted_label": "dog",
+      "confidence": 0.7637,
+      "round_trip_ms": 120.03
+    },
+    {
+      "filename": "dog_01310.jpg",
+      "true_label": "dog",
+      "predicted_label": "dog",
+      "confidence": 0.7141,
+      "round_trip_ms": 130.97
+    },
+    {
+      "filename": "dog_01093.jpg",
+      "true_label": "dog",
+      "predicted_label": "cat",
+      "confidence": 0.7282,
+      "round_trip_ms": 128.05
+    }
+  ]
+}
