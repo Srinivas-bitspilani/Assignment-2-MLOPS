@@ -32,17 +32,25 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
 | Kubernetes | Minikube 1.38.1 / k8s v1.35.1 | **2/2 replicas ready**, rolling update, smoke tests pass |
 | Post-deploy eval | 400 HTTP requests to the cluster | 400/400 answered, 72.50 % accuracy |
 
-**Verified in GitHub Actions** (commit `b61e9a3`):
+**Verified in GitHub Actions** (commit `ac83a70`):
 
 | Workflow | Job | Result | Time |
 |---|---|---|---|
-| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Pytest (preprocessing + inference) | **success** — 57 tests | 0.9 min |
-| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Build & publish image | **success** — built, smoke-tested, pushed to GHCR | 2.1 min |
-| [CD #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33176095013) | Deploy to Kubernetes and smoke test | **success** — rollout complete, smoke tests passed | 2.6 min |
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Tests (py3.12) | **success** — 79 tests | 1.0 min |
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Tests (py3.13) | **success** — 79 tests | 1.1 min |
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Build & publish image | **success** — built, smoke-tested, pushed to GHCR | 1.7 min |
+| [CD #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197945076) | Deploy to Kubernetes and smoke test | **success** — rollout + smoke tests | 2.3 min |
 
-CD was triggered **automatically** by CI success, and the *"Roll back if the smoke
-tests failed"* step shows as `skipped` — the failure path is wired up and simply
-was not needed.
+Each run uploads its evidence: `test-evidence-py3.12`, `test-evidence-py3.13`
+(JUnit XML, coverage, HTML coverage, model inspection), `build-evidence` (the
+image's own `/health`, `/predict`, `/metrics` responses) and
+`deployment-evidence` (kubectl output, smoke-test stdout, pod logs, live
+metrics). CD is triggered **automatically** by CI success.
+
+The gates are proven by a real failure, not just by green runs: in CI #5 the
+test job failed, and `Build & publish image` plus the whole of CD #5 were
+**skipped** — no image published, no deployment. Details in
+[docs/EVIDENCE.md](docs/EVIDENCE.md#the-gate-demonstrated-under-failure).
 
 **Published image:** `ghcr.io/srinivas-bitspilani/assignment-2-mlops`
 

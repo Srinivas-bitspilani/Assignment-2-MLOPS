@@ -190,7 +190,49 @@ checking the artifacts is.
 
 ---
 
-## 5. What every CI run uploads
+## 5. Confirmed pipeline runs
+
+Commit `ac83a70`, with the artifacts each job uploaded:
+
+| Workflow | Job | Result | Time | Uploaded |
+|---|---|---|---|---|
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Tests (py3.12) | **success** | 1.0 min | `test-evidence-py3.12` (115 KB) |
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Tests (py3.13) | **success** | 1.1 min | `test-evidence-py3.13` (115 KB) |
+| [CI #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197730399) | Build & publish image | **success** | 1.7 min | `build-evidence` (2 KB) |
+| [CD #6](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33197945076) | Deploy to Kubernetes and smoke test | **success** | 2.3 min | `deployment-evidence` (10 KB) |
+
+### The gate demonstrated under failure
+
+CI #5 failed on purpose-revealing bugs, and the run record shows the pipeline
+refusing to ship:
+
+| Job | Result |
+|---|---|
+| `Tests (py3.11)` | **failure** — `numpy==2.5.2` requires Python >= 3.12 |
+| `Tests (py3.12)` | **failure** — a test imported mlflow, which CI does not install |
+| `Build & publish image` | **skipped** — blocked by `needs: test` |
+| CD #5 | **skipped** — blocked by `workflow_run` requiring CI success |
+
+No image was published and no deployment happened. That is stronger evidence
+that the gates work than any green run: they were tested by a real failure.
+
+The fixes were a pin-compatible matrix (3.12 / 3.13, verified against every
+pinned package on PyPI first) and moving the gate logic into
+[`src/promotion.py`](../src/promotion.py), which imports no MLflow.
+[`scripts/check_ci_imports.py`](../scripts/check_ci_imports.py) now reproduces
+CI's serving-only environment locally so this class of failure cannot recur:
+
+```bash
+python scripts/check_ci_imports.py
+```
+```
+Hiding training-only imports: ['dvc', 'matplotlib', 'mlflow', 'sklearn']
+79 passed
+```
+
+---
+
+## 6. What every CI run uploads
 
 Both workflows attach downloadable artifacts (90-day retention) and render
 summary tables onto the run page, so results are visible without downloading
@@ -220,7 +262,7 @@ trusting the rollout message, and on failure captures pod logs and describes
 
 ---
 
-## 6. Reproducing all of it
+## 7. Reproducing all of it
 
 ```bash
 pip install -r requirements.txt
