@@ -1,0 +1,59 @@
+# DVC pipeline: the reproducible path from raw images to a trained artifact.
+#
+#   data/raw (dvc add)  ->  preprocess  ->  data/processed  ->  train  ->  model.pt
+#
+# Why this matters: `dvc repro` re-runs only the stages whose dependencies or
+# params actually changed. Edit data.image_size in params.yaml and DVC knows
+# preprocessing AND training are stale; edit train.epochs and it knows only
+# training is. That dependency tracking is the point of declaring the pipeline
+# instead of running the scripts by hand.
+#
+# Useful commands:
+#   python -m dvc dag                 # show the stage graph
+#   python -m dvc repro               # run whatever is stale
+#   python -m dvc status              # what would re-run and why
+#   python -m dvc params diff         # params changed since the last commit
+#   python -m dvc metrics show        # metrics from artifacts/metrics.json
+
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py
+    deps:
+      - src/data/preprocess.py
+      - src/config.py
+      - data/raw
+    params:
+      - data.image_size
+      - data.channels
+      - data.classes
+      - data.split
+      - data.seed
+    outs:
+      - data/processed
+
+  train:
+    cmd: python train.py
+    deps:
+      - train.py
+      - src/training/train.py
+      - src/models/cnn.py
+      - src/data/dataset.py
+      - src/config.py
+      - data/processed
+    params:
+      - data.normalize
+      - augmentation
+      - train
+      - model
+      - mlflow
+    outs:
+      - artifacts/model.pt:
+          cache: false        # also committed to Git: the CI image build needs it
+    metrics:
+      - artifacts/metrics.json:
+          cache: false
+    plots:
+      - artifacts/training_curves.png:
+          cache: false
+      - artifacts/confusion_matrix.png:
+          cache: false

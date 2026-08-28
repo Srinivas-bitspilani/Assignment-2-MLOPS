@@ -1,0 +1,36 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 7dcf4c5bc5142a33091ac9159ecc5e9d.dir
+      size: 187791499
+      nfiles: 4000
+    - path: src/config.py
+      hash: md5
+      md5: a16c150b9979f4a3f386c3724be6577c
+      size: 1017
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: 59b706f9257d043dc7f005187ebc5ea4
+      size: 4490
+    params:
+      params.yaml:
+        data.channels: 3
+        data.classes:
+        - cat
+        - dog
+        data.image_size: 224
+        data.seed: 42
+        data.split:
+          train: 0.8
+          val: 0.1
+          test: 0.1
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 47da17fb629c6fd802cbe98d91568d5d.dir
+      size: 80410730
+      nfiles: 4001

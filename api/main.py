@@ -1,9 +1,11 @@
 """FastAPI inference service for the Cats vs Dogs classifier.
 
 Endpoints
-    GET  /health   - liveness/readiness probe; reports whether the model loaded
-    POST /predict  - multipart image upload -> predicted label + class probabilities
-    GET  /         - tiny service description
+    GET  /health              - liveness/readiness probe; reports model status
+    POST /predict             - image upload -> predicted label + probabilities
+    GET  /metrics             - request count, latency stats, prediction counts
+    GET  /metrics/prometheus  - the same numbers in Prometheus text format
+    GET  /                    - tiny service description
 
 The model is loaded once during application startup (lifespan), never per
 request, so /predict stays fast.
@@ -18,15 +20,17 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from api.model_loader import ModelService, get_model_service  # noqa: E402
+from api.monitoring import log_event, metrics  # noqa: E402
 from api.preprocessing import InvalidImageError  # noqa: E402
 
 API_VERSION = "1.0.0"
@@ -97,6 +101,49 @@ app = FastAPI(
 )
 
 
+@app.middleware("http")
+async def observe_requests(request: Request, call_next):
+    """Time every request, count it, and log one structured JSON line.
+
+    Applied as middleware so monitoring covers all endpoints uniformly and no
+    handler has to remember to instrument itself.
+    """
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+    except Exception:
+        # Count the failure before letting the exception propagate.
+        latency_ms = (time.perf_counter() - started) * 1000
+        metrics.record_request(request.url.path, 500, latency_ms)
+        log_event(
+            "request",
+            method=request.method,
+            path=request.url.path,
+            status=500,
+            latency_ms=round(latency_ms, 2),
+            error="unhandled_exception",
+        )
+        raise
+
+    latency_ms = (time.perf_counter() - started) * 1000
+    metrics.record_request(request.url.path, status_code, latency_ms)
+
+    # Health probes fire every few seconds; logging them would drown the log.
+    if request.url.path != "/health":
+        log_event(
+            "request",
+            method=request.method,
+            path=request.url.path,
+            status=status_code,
+            latency_ms=round(latency_ms, 2),
+            client=request.client.host if request.client else None,
+        )
+
+    response.headers["X-Response-Time-ms"] = f"{latency_ms:.2f}"
+    return response
+
+
 def _service(require_loaded: bool = True) -> ModelService | None:
     service = getattr(app.state, "model_service", None)
     if require_loaded and service is None:
@@ -115,7 +162,12 @@ def root() -> dict:
     return {
         "service": "cats-vs-dogs-classifier",
         "version": API_VERSION,
-        "endpoints": {"health": "GET /health", "predict": "POST /predict", "docs": "/docs"},
+        "endpoints": {
+            "health": "GET /health",
+            "predict": "POST /predict",
+            "metrics": "GET /metrics",
+            "docs": "/docs",
+        },
     }
 
 
@@ -150,6 +202,25 @@ def health() -> JSONResponse:
     )
 
 
+@app.get("/metrics", tags=["monitoring"])
+def get_metrics() -> dict:
+    """Request counts, latency percentiles and prediction distribution.
+
+    Note: metrics are per-process, so with 2 replicas each pod reports its own
+    share of the traffic.
+    """
+    snapshot = metrics.snapshot()
+    service = _service(require_loaded=False)
+    snapshot["model"] = service.info() if service else {"model_loaded": False}
+    return snapshot
+
+
+@app.get("/metrics/prometheus", response_class=PlainTextResponse, tags=["monitoring"])
+def get_prometheus_metrics() -> str:
+    """The same metrics in Prometheus text exposition format."""
+    return metrics.prometheus()
+
+
 @app.post("/predict", response_model=PredictionResponse, tags=["inference"])
 async def predict(file: UploadFile = File(..., description="Image file (JPEG/PNG)")):
     """Classify one uploaded image as cat or dog."""
@@ -166,13 +237,25 @@ async def predict(file: UploadFile = File(..., description="Image file (JPEG/PNG
         result = service.predict(image_bytes)
     except InvalidImageError as exc:
         # A bad upload is the caller's fault -> 400, not a 500.
+        log_event(
+            "prediction_rejected",
+            filename=file.filename,
+            bytes=len(image_bytes),
+            reason=str(exc),
+        )
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    logger.info(
-        "predict filename=%s label=%s confidence=%.4f latency_ms=%.2f",
-        file.filename,
-        result["predicted_label"],
-        result["confidence"],
-        result["inference_time_ms"],
+    metrics.record_prediction(result["predicted_label"], result["confidence"])
+
+    # Response logging: the full prediction is recorded so predictions can be
+    # audited later and compared against true labels (M5 evaluation).
+    log_event(
+        "prediction",
+        filename=file.filename,
+        bytes=len(image_bytes),
+        predicted_label=result["predicted_label"],
+        confidence=round(result["confidence"], 4),
+        probabilities={k: round(v, 4) for k, v in result["probabilities"].items()},
+        inference_time_ms=result["inference_time_ms"],
     )
     return PredictionResponse(filename=file.filename, **result)
