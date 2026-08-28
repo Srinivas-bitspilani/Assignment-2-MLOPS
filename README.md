@@ -10,14 +10,6 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
    → Kubernetes → CD → Smoke Tests → Monitoring
 ```
 
-| Module | Scope | Status |
-|---|---|---|
-| **M1** | Model development & experiment tracking | Complete |
-| **M2** | Packaging & containerization | Complete |
-| **M3** | CI: tests, image build, registry publish | Complete |
-| **M4** | CD: Kubernetes deployment & smoke tests | Complete |
-| **M5** | Monitoring, logging & final packaging | Complete |
-
 **Verified by execution locally** (Windows 11, 8-core CPU, no GPU):
 
 | Stage | Tooling | Result |
