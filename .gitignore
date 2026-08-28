@@ -7,8 +7,7 @@ venv/
 env/
 
 # ---- Data (versioned by DVC, not Git) ----
-/data/raw/*
-!/data/raw/.gitkeep
+# DVC writes its own /data/.gitignore entries for anything added with `dvc add`.
 /data/processed/*
 !/data/processed/.gitkeep
 
