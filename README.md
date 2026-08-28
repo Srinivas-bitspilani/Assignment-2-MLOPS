@@ -18,7 +18,7 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
 | **M4** | CD: Kubernetes deployment & smoke tests | Complete |
 | **M5** | Monitoring, logging & final packaging | Complete |
 
-**Verified by execution on this machine** (Windows 11, Dell Latitude 5410, no GPU):
+**Verified by execution locally** (Windows 11, 8-core CPU, no GPU):
 
 | Stage | Tooling | Result |
 |---|---|---|
@@ -33,9 +33,9 @@ Dataset → Preprocessing → Training → MLflow → Model Artifact → FastAPI
 
 | Workflow | Job | Result | Time |
 |---|---|---|---|
-| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Pytest (preprocessing + inference) | ✅ **success** — 57 tests | 0.9 min |
-| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Build & publish image | ✅ **success** — built, smoke-tested, pushed to GHCR | 2.1 min |
-| [CD #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33176095013) | Deploy to Kubernetes and smoke test | ✅ **success** — rollout complete, smoke tests passed | 2.6 min |
+| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Pytest (preprocessing + inference) | **success** — 57 tests | 0.9 min |
+| [CI #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33175845979) | Build & publish image | **success** — built, smoke-tested, pushed to GHCR | 2.1 min |
+| [CD #1](https://github.com/Srinivas-bitspilani/Assignment-2-MLOPS/actions/runs/33176095013) | Deploy to Kubernetes and smoke test | **success** — rollout complete, smoke tests passed | 2.6 min |
 
 CD was triggered **automatically** by CI success, and the *"Roll back if the smoke
 tests failed"* step shows as `skipped` — the failure path is wired up and simply
@@ -118,11 +118,12 @@ not a coincidence of rounding.
 The containerised deployment is ~40 % faster per request despite being limited
 to a single torch thread — Linux + a slim image beats Windows-host Python here.
 
-**Is 72.5 % good?** For a 4-conv-block CNN trained from scratch on 3,200 images,
-yes — random is 50 %. The limit here is data volume and model capacity, not the
-pipeline. Fine-tuning a pretrained ResNet18 would reach ~97 % on the same data,
-but the assignment asks for a *baseline* CNN, and a baseline is what makes later
-improvements measurable.
+**Interpretation.** For a 4-conv-block CNN trained from scratch on 3,200 images,
+72.5 % is a reasonable baseline against a 50 % random floor. The binding
+constraints are dataset volume and model capacity, not the pipeline. Fine-tuning
+a pretrained ResNet18 would reach roughly 97 % on the same data; a from-scratch
+baseline was chosen deliberately so that such improvements can be measured
+against a known reference point.
 <!-- RESULTS_END -->
 
 Artifacts produced by a training run:
@@ -266,7 +267,7 @@ Expect `overlaps: 0 0 0`.
 `src/data/dataset.py` applies `RandomResizedCrop(224, 0.8–1.0)` →
 `RandomHorizontalFlip` → `RandomRotation(±15°)` → `ColorJitter(0.2)` →
 `ToTensor` → ImageNet `Normalize` **to the training set only**. Validation and
-test get resize + normalize, so their scores stay honest.
+test get resize + normalize, so their scores remain an unbiased estimate.
 
 ```bash
 python src/data/dataset.py
@@ -560,7 +561,7 @@ long-running pod can't grow memory without limit, while the totals still count
 every request. A Prometheus rendering is at `/metrics/prometheus`.
 
 > Metrics are **per-process**. With 2 replicas each pod reports its own share of
-> traffic — that is a deliberate simplification, not a bug. Aggregating across
+> traffic. This is a deliberate scope decision. Aggregating across
 > pods is what a real Prometheus deployment would add.
 
 ### 8.3 Post-deployment evaluation (true vs predicted)
@@ -672,7 +673,7 @@ python scripts/evaluate_deployed_model.py --base-url "$(minikube service cats-do
 
 ---
 
-## 11. Design decisions & honest limitations
+## 11. Design decisions & limitations
 
 **Decisions**
 
