@@ -163,7 +163,7 @@ python scripts/evaluate_deployed_model.py --base-url http://localhost:8000 -n 20
 | `test_registry.py` | 22 | Model factory and the promotion gate |
 | `test_monitoring.py` | 11 | Counters, latency percentiles, log format |
 
-Run in CI against **Python 3.11 and 3.12**.
+Run in CI against **Python 3.12 and 3.13** (3.12 is the floor: `numpy==2.5.2` declares `requires_python >= 3.12`).
 
 ### Coverage
 
