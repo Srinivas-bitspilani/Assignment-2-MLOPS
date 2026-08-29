@@ -1,0 +1,126 @@
+# Prometheus: scrape configuration, deployment and service.
+#
+# The scrape target is discovered with kubernetes_sd_configs using role:
+# endpoints, NOT the Service DNS name. This distinction matters: scraping the
+# Service name would let kube-proxy load-balance each scrape to one random
+# replica, so Prometheus would silently record only part of the traffic and the
+# other replica's numbers would vanish. Endpoint discovery resolves the Service
+# to its individual Pod IPs and scrapes every Pod separately, which is also what
+# makes the per-process metrics limitation of the API disappear once summed.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      evaluation_interval: 10s
+
+    scrape_configs:
+      # ---- the inference API, one target per Pod ----
+      - job_name: cats-dogs-api
+        metrics_path: /metrics/prometheus
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [default]
+        relabel_configs:
+          # Keep only the endpoints belonging to our Service.
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: cats-dogs-api
+          # Label every sample with the Pod that produced it, so a query can be
+          # broken out per replica or summed across them.
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: pod_ip
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+
+      # ---- Prometheus scraping itself, useful as a liveness signal ----
+      - job_name: prometheus
+        static_configs:
+          - targets: ["localhost:9090"]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.54.1
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=6h"
+            - "--web.enable-lifecycle"
+          ports:
+            - name: http
+              containerPort: 9090
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: storage
+              mountPath: /prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: storage
+          emptyDir: {}          # demo scope: metrics need not survive a restart
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  type: NodePort
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      nodePort: 30090

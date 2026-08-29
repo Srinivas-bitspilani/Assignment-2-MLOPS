@@ -1,0 +1,8 @@
+# Monitoring runs in its own namespace, separate from the application, so the
+# stack can be applied, inspected or torn down without touching the service.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring

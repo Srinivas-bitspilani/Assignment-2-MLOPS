@@ -1,0 +1,252 @@
+# Grafana, provisioned entirely from ConfigMaps.
+#
+# The datasource and the dashboard are declared as files mounted into the
+# container, not clicked together in the UI, so the whole monitoring stack is
+# reproducible from these manifests alone: delete the namespace, re-apply, and
+# the identical dashboard is back.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: monitoring
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.monitoring.svc.cluster.local:9090
+        isDefault: true
+        editable: false
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: monitoring
+data:
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: cats-dogs
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-catsdogs
+  namespace: monitoring
+data:
+  cats-dogs.json: |
+    {
+      "uid": "cats-dogs-api",
+      "title": "Cats vs Dogs API",
+      "tags": ["mlops", "inference"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "time": { "from": "now-30m", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Total requests",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "sum(api_requests_total)", "legendFormat": "requests" }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Predictions served",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "sum(api_predictions_total)", "legendFormat": "predictions" }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Errors (4xx/5xx)",
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": { "mode": "absolute", "steps": [
+                { "color": "green", "value": null }, { "color": "red", "value": 1 } ] },
+              "color": { "mode": "thresholds" }
+            }, "overrides": []
+          },
+          "targets": [
+            { "refId": "A", "expr": "sum(api_request_errors_total)", "legendFormat": "errors" }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Replicas scraped",
+          "description": "Number of Pods Prometheus is scraping individually. Should equal the Deployment's replica count.",
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" } }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "count(count by (pod) (api_requests_total))", "legendFormat": "pods" }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "Request rate per Pod (req/s)",
+          "description": "Broken out by Pod - direct evidence that every replica is scraped independently.",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+          "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "reqps" }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "rate(api_requests_total[1m])", "legendFormat": "{{pod}}" }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Latency per Pod (ms)",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+          "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 5 }, "unit": "ms" }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "api_request_latency_ms_p95", "legendFormat": "p95 {{pod}}" },
+            { "refId": "B", "expr": "api_request_latency_ms_average", "legendFormat": "mean {{pod}}" }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "piechart",
+          "title": "Predictions by label",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+          "options": { "legend": { "displayMode": "list", "placement": "right", "showLegend": true } },
+          "targets": [
+            { "refId": "A", "expr": "sum by (label) (api_predictions_by_label)", "legendFormat": "{{label}}" }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Requests by endpoint",
+          "description": "The /health series is Kubernetes' readiness and liveness probes.",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+          "fieldConfig": { "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "sum by (endpoint) (api_requests_by_endpoint)", "legendFormat": "{{endpoint}}" }
+          ]
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Pod uptime (s)",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+          "fieldConfig": { "defaults": { "custom": { "lineWidth": 2 }, "unit": "s" }, "overrides": [] },
+          "targets": [
+            { "refId": "A", "expr": "api_uptime_seconds", "legendFormat": "{{pod}}" }
+          ]
+        }
+      ]
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.2.0
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: admin
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: admin
+            # Anonymous viewing so the dashboard opens straight away in a demo.
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Viewer
+            - name: GF_USERS_DEFAULT_THEME
+              value: light
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 12
+          volumeMounts:
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
+      volumes:
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dashboards
+          configMap:
+            name: grafana-dashboard-catsdogs
+            items:
+              - key: cats-dogs.json
+                path: cats-dogs.json
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30300
