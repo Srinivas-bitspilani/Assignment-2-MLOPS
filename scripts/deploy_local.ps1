@@ -19,7 +19,15 @@
 #>
 
 $ErrorActionPreference = "Stop"
-$IMAGE = "cats-dogs-api:local"
+
+# A UNIQUE tag per deploy, mirroring what CD does with the commit SHA.
+# Reusing one fixed tag is a trap: `minikube image load` skips the copy when the
+# tag already exists in the cluster, and `kubectl set image` with an unchanged
+# tag is a no-op, so the cluster silently keeps serving the previous model.
+$SHA = (git rev-parse --short HEAD 2>$null)
+if (-not $SHA) { $SHA = "nogit" }
+$STAMP = Get-Date -Format "HHmmss"
+$IMAGE = "cats-dogs-api:local-$SHA-$STAMP"
 $DEPLOYMENT = "cats-dogs-api"
 
 function Step($message) {
@@ -44,6 +52,8 @@ if (-not (Test-Path "artifacts/model.pt")) {
     throw "artifacts/model.pt is missing. Run 'python train.py' first."
 }
 Write-Host "  artifacts/model.pt found"
+$modelInfo = python -c "import torch;c=torch.load('artifacts/model.pt',map_location='cpu',weights_only=False);print(c.get('architecture','baseline_cnn'), c.get('metrics',{}).get('test_accuracy'))"
+Write-Host "  shipping model: $modelInfo"
 
 # ---- 1. build ----------------------------------------------------------- #
 Step "1/6  Building the Docker image"
@@ -61,9 +71,11 @@ if ($status -ne "Running") {
 }
 
 Step "3/6  Loading the image into the cluster"
-# Without this the node cannot see a locally-built image.
-minikube image load $IMAGE
+# Without this the node cannot see a locally-built image. --overwrite is belt
+# and braces now that the tag is unique per deploy.
+minikube image load $IMAGE --overwrite
 if ($LASTEXITCODE -ne 0) { throw "minikube image load failed" }
+Write-Host "  loaded $IMAGE"
 
 # ---- 3. deploy ---------------------------------------------------------- #
 Step "4/6  Applying manifests and setting the image"
